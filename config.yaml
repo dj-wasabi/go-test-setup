@@ -1,0 +1,30 @@
+---
+
+# Listen address, either with ip and port, or in case of
+# port alone, prefix it with a ":", like ":8000"
+http:
+  cors:
+    host: http://localhost:8888
+  listen: 8888
+
+# Various timeout configuration options. The values are
+# in seconds.
+  timeout:
+    idle: 10
+    read: 10
+    write: 30
+
+database:
+  hostname: 192.168.101.4
+  port: 27017
+  
+  username: 
+  password: 
+  dbname: mongo-golang-test
+
+logging:
+  level: info
+
+# Some dummy config
+pizza:
+  konijn: pizza

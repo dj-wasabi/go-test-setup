@@ -1,0 +1,365 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Wernertie Dijkermannetjuhh
+  description: Geen idee, nog over nadenken weet je?
+  license:
+    name: MIT
+tags:
+  - name: Organisation
+  - name: Authentication
+  - name: Dummy
+servers:
+  - url: "http://localhost/api/v1"
+paths:
+  /organisations:
+    get:
+      description: Returns all organisations
+      summary: Returns all organisations
+      operationId: GetAllOrganisations
+      tags:
+        - Organisation
+      parameters:
+        - name: limit
+          in: query
+          description: Size of the page, maximum is 100, default is 25
+          required: false
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+            format: int32
+            example: 25
+        - name: page
+          in: query
+          description: The page to return
+          required: false
+          schema:
+            type: integer
+            maximum: 999999
+            default: 1
+            format: int32
+            example: 100
+      responses:
+        "200":
+          description: A paged array of pets
+          headers:
+            X-NEXT:
+              example: "http://localhost/api/v1/organisations?page=2&size=25"
+              description: A link to the next page of responses
+              schema:
+                type: string
+            X-PREVIOUS:
+              example: "http://localhost/api/v1/organisations?page=1&size=25"
+              description: A link to the previous page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              example: []
+              schema:
+                $ref: "#/components/schemas/GetAllOrganisations"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              example:
+                {
+                  "requestId": "12345678-1234-1234-1234-1234567890ab",
+                  "code": "EPE000001",
+                  "message": "An error occurred",
+                }
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create an organisation
+      description: Create an organisation
+      operationId: createOrganisation
+      tags:
+        - Organisation
+      requestBody:
+        description: Organisation to add
+        content:
+          application/json:
+            example: { "name": "Company Name", "Description": "This is an amazing Company", "fqdn": "https://www.amazing.com/pany", "admins": ["username1"] }
+            schema:
+              $ref: "#/components/schemas/CreateOrganisationRequest"
+        required: true
+      responses:
+        "201":
+          description: Empty response
+          headers:
+            X-OBJECT-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: ObjectIO of the create organisation
+              schema:
+                type: string
+            X-CORRELATION-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Id of the correlation
+              schema:
+                type: string
+            Content-Location:
+              example: "http://localhost/v1/organisations/12345678-1234-1234-1234-1234567890ab"
+              description: Link to the created organisations
+              schema:
+                type: string
+        default:
+          description: When create fails
+          headers:
+            X-CORRELATION-ID:
+              example: 12345678-1234-1234-1234-1234567890ab
+              description: Id of the correlation of the create organisation request
+              schema:
+                type: string
+          content:
+            application/json:
+              example:
+                {
+                  "requestId": "12345678-1234-1234-1234-1234567890ab",
+                  "code": "EPE000002",
+                  "message": "Create failed",
+                }
+              schema:
+                $ref: "#/components/schemas/Error"
+  /auth/login:
+    post:
+      summary: Authenticate
+      description: Authenticate so we can get a token and do stuff
+      operationId: authenticateLogin
+      tags:
+        - Authentication
+      requestBody:
+        description: Authenticate
+        content:
+          application/json:
+            example: { "username": "My Name", "password": "verySecret!"}
+            schema:
+              $ref: "#/components/schemas/AuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: Expected response to a valid request
+          headers:
+          content:
+            application/json:
+              example:
+                {
+                  "token": "my.jwt.example"
+                }
+              schema:
+                type: string
+                example: token
+        default:
+          description: Could not find organisation
+          headers:
+            X-CORRELATION-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Id of the correlation of the get organisation by id request error
+              schema:
+                type: string
+                example: "12345678-1234-1234-1234-1234567890ab"
+          content:
+            application/json:
+              example:
+                {
+                  "message": "Could not find organisation"
+                }
+              schema:
+                $ref: "#/components/schemas/Error"
+  /test:
+    get:
+      summary: Listing dummy stuff
+      description: A dummy things right now
+      operationId: listTags
+      tags:
+        - Dummy
+      responses:
+        "200":
+          description: An array of tags
+          headers:
+            X-CORRELATION-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Id of the get tags request
+              schema:
+                type: string
+          content:
+            application/json:
+              example:
+                [
+                  {
+                    "id": "12345678-1234-1234-1234-1234567890ab",
+                    "name": "tag1",
+                  },
+                ]
+              schema:
+                $ref: "#/components/schemas/Dummy"
+        default:
+          description: Could not find tags
+          headers:
+            X-CORRELATION-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Id of the correlation of the get tags request error
+              schema:
+                type: string
+                example: "12345678-1234-1234-1234-1234567890ab"
+          content:
+            application/json:
+              example:
+                {
+                  "message": "Could not find tags"
+                }
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    ObjectId:
+      description: ObjectId
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "12345678-1234-1234-1234-1234567890ab"
+    Admin:
+      required:
+        - tag
+      description: A username
+      example: 
+      properties:
+        user:
+          example: username1
+          type: string
+          maxLength: 50
+          format: ".{1,50}"
+    AdminsArray:
+      type: array
+      description: Array of tags
+      example: ["username1", "username2"]
+      items:
+        $ref: "#/components/schemas/Admin"
+    AdminsArrayType:
+      type: object
+      description: Payload for admins
+      example: { "admins": ["username1", "username2"] }
+      properties:
+        admins:
+          type: array
+          example: ["username1", "username2"]
+          items:
+            $ref: "#/components/schemas/Admin"
+    AuthenticationRequest:
+      type: object
+      description: Authenticate
+      required:
+        - username
+        - password
+      example:
+        {
+          "username": "username",
+          "password": "very_secret!"
+        }
+      properties:
+        username:
+          type: string
+          example: username1
+        password:
+          type: string
+          example: password
+    CompanyPayload:
+      type: object
+      description: Payload for creating an organisation
+      example: { "name": "Company Name", "admins": ["username1", "username2"] }
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Name of the company
+        description:
+          type: string
+          example: Description of the company
+        fqdn:
+          type: string
+          example: FQDN of the environment
+        admins:
+          type: array
+          example: ["username1", "username2"]
+    GetAllOrganisations:
+      type: array
+      maxItems: 100
+      description: Array of Organisations
+      example:
+        [
+          {
+            "name": "Organisation Name",
+            "description": "This is an amazing company",
+            "fqdn": "www.my.com/pany",
+            "admins": ["username1", "username2"],
+          },
+        ]
+      items:
+        $ref: "#/components/schemas/Organisation"
+    Organisation:
+      description: An existing organisation
+      allOf:
+        - $ref: "#/components/schemas/ObjectId"
+        - $ref: "#/components/schemas/CompanyPayload"
+        - $ref: "#/components/schemas/AdminsArray"
+    CreateOrganisationRequest:
+      description: Request to create an organisation
+      allOf:
+        - $ref: "#/components/schemas/AdminsArrayType"
+        - $ref: "#/components/schemas/CompanyPayload"
+    Error:
+      type: object
+      description: Error response
+      required:
+        # - requestId
+        # - code
+        - message
+      example:
+        {
+          "message": "An error occurred"
+        }
+      properties:
+        message:
+          type: string
+          example: An error occurred
+    Dummy:
+      type: object
+      description: Dummy response
+      required:
+        # - requestId
+        # - code
+        - message
+      example:
+        {
+          "message": "An error occurred"
+        }
+      properties:
+        message:
+          type: string
+          example: An error occurred
+    # TagsResponse:
+    #   description: List of tags
+    #   type: array
+    #   example:
+    #     [{ "id": "12345678-1234-1234-1234-1234567890ab", "name": "tag1" }]
+    #   items:
+    #     $ref: "#/components/schemas/TagResponse"
+    # TagResponse:
+    #   description: A single tag
+    #   type: object
+    #   required:
+    #     - id
+    #     - name
+    #   example: { "id": "12345678-1234-1234-1234-1234567890ab", "name": "tag1" }
+    #   properties:
+    #     id:
+    #       type: string
+    #       format: uuid
+    #       example: "12345678-1234-1234-1234-1234567890ab"
+    #     name:
+    #       type: string
+    #       example: name
+    #       pattern: "[A-Za-z0-9_-\\s]{3,50}"
