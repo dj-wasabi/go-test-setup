@@ -4,14 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"werner-dijkerman.nl/test-setup/port/out"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"werner-dijkerman.nl/test-setup/domain/model"
 )
 
 // asasasasasa (These come from port/out/(interface))
-func (mc *mongodbConnection) GetUserByName(username string, ctx context.Context) (*out.User, error) {
+func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*model.User, error) {
 	var mdbCollection string = "user"
 	mc.Logging.Debug(fmt.Sprintf("About to Create Organisations %v", username))
 
@@ -24,11 +27,41 @@ func (mc *mongodbConnection) GetUserByName(username string, ctx context.Context)
 		return nil, result.Err()
 	}
 
-	user := new(*out.User)
+	user := new(*model.User)
 	err := result.Decode(&user)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	return *user, nil
+}
+
+func (mc *mongodbConnection) UpdateToken(ctx context.Context, token, username string) bool {
+	var mdbCollection string = "user"
+	var updateObj primitive.D
+	coll := mc.SetupCollection(mdbCollection)
+
+	updateObj = append(updateObj, bson.E{"token", token})
+	updatedAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	updateObj = append(updateObj, bson.E{"updated_at", updatedAt})
+
+	upsert := true
+	filter := bson.M{"username": username}
+	opt := options.UpdateOptions{
+		Upsert: &upsert,
+	}
+
+	_, err := coll.UpdateOne(
+		ctx,
+		filter,
+		bson.D{
+			{"$set", updateObj},
+		},
+		&opt,
+	)
+
+	if err != nil {
+		return false
+	}
+	return true
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"werner-dijkerman.nl/test-setup/domain/model"
-	"werner-dijkerman.nl/test-setup/port/in"
 )
 
 // cs.uc --> domain/services/organisation
@@ -18,7 +17,7 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cs.uc.CreateOrganisation(context.Background(), in.NewOrganisationInPort(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
+	cs.uc.CreateOrganisation(context.Background(), model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
 	c.JSON(http.StatusOK, e)
 }
 
@@ -36,5 +35,5 @@ func (cs *ApiHandler) ListTags(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cs.uc.CreateOrganisation(context.Background(), in.NewOrganisationInPort(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
+	cs.uc.CreateOrganisation(context.Background(), model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
 }

@@ -15,11 +15,6 @@ type Admin struct {
 // AdminsArray Array of tags
 type AdminsArray = []Admin
 
-// AdminsArrayType Payload for admins
-type AdminsArrayType struct {
-	Admins *[]Admin `json:"admins,omitempty"`
-}
-
 // AuthenticationRequest Authenticate
 type AuthenticationRequest struct {
 	Password string `json:"password"`
@@ -28,14 +23,6 @@ type AuthenticationRequest struct {
 
 // CompanyPayload Payload for creating an organisation
 type CompanyPayload struct {
-	Admins      *[]interface{} `json:"admins,omitempty"`
-	Description *string        `json:"description,omitempty"`
-	Fqdn        *string        `json:"fqdn,omitempty"`
-	Name        string         `json:"name"`
-}
-
-// CreateOrganisationRequest defines model for CreateOrganisationRequest.
-type CreateOrganisationRequest struct {
 	Admins      *[]interface{} `json:"admins,omitempty"`
 	Description *string        `json:"description,omitempty"`
 	Fqdn        *string        `json:"fqdn,omitempty"`
@@ -69,6 +56,14 @@ type Organisation struct {
 	Name        string              `json:"name"`
 }
 
+// UserCreateRequest Authenticate
+type UserCreateRequest struct {
+	Enabled  *bool          `json:"enabled,omitempty"`
+	Password string         `json:"password"`
+	Roles    *[]interface{} `json:"roles,omitempty"`
+	Username string         `json:"username"`
+}
+
 // GetAllOrganisationsParams defines parameters for GetAllOrganisations.
 type GetAllOrganisationsParams struct {
 	// Limit Size of the page, maximum is 100, default is 25
@@ -82,4 +77,7 @@ type GetAllOrganisationsParams struct {
 type AuthenticateLoginJSONRequestBody = AuthenticationRequest
 
 // CreateOrganisationJSONRequestBody defines body for CreateOrganisation for application/json ContentType.
-type CreateOrganisationJSONRequestBody = CreateOrganisationRequest
+type CreateOrganisationJSONRequestBody = CompanyPayload
+
+// UserCreateJSONRequestBody defines body for UserCreate for application/json ContentType.
+type UserCreateJSONRequestBody = UserCreateRequest

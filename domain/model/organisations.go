@@ -12,14 +12,14 @@ type ListOrganisations struct {
 }
 
 type Organization struct {
-	ID          string    `json:"id,omitempty"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Enabled     bool      `json:"enabled"`
-	CreatedAt   time.Time `json:"-"`
-	UpdatedAt   time.Time `json:"-"`
-	Fqdn        string    `json:"fqdn"`
-	Admins      []string  `json:"admins,omitempty"`
+	ID          string    `json:"id,omitempty" bson:"_id"`
+	Name        string    `json:"name" bson:"name"`
+	Description string    `json:"description" bson:"description"`
+	Enabled     bool      `json:"enabled" bson:"enabled"`
+	CreatedAt   time.Time `json:"-" bson:"created_at"`
+	UpdatedAt   time.Time `json:"-" bson:"updated_at"`
+	Fqdn        string    `json:"fqdn" bson:"fqdn"`
+	Admins      []string  `json:"admins,omitempty" bson:"admins"`
 }
 
 type IOrganisation interface {
@@ -55,7 +55,7 @@ func (o *Organization) GetAdmins() []string {
 	return o.Admins
 }
 
-func NewOrganization(name, description, fqdn string, enabled bool, admins []string) (*Organization, error) {
+func NewOrganization(name, description, fqdn string, enabled bool, admins []string) *Organization {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	e := &Organization{
@@ -70,7 +70,7 @@ func NewOrganization(name, description, fqdn string, enabled bool, admins []stri
 	err := validate.Struct(e)
 	if err != nil {
 		fmt.Println(err.Error())
-		return &Organization{}, err
+		return &Organization{}
 	}
-	return e, err
+	return e
 }

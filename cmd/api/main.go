@@ -22,8 +22,8 @@ func main() {
 
 	c := config.ReadConfig()
 
-	con := mongodb.NewMongoDBConnection(c)
-	h := services.NewDBService(con)
+	org, usr := mongodb.NewMongoDBConnection(c)
+	h := services.NewdomainServices(org, usr)
 	server := api.NewGinServer(api.NewApiService(h), c)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

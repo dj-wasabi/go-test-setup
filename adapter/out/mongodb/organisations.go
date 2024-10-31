@@ -8,16 +8,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"werner-dijkerman.nl/test-setup/domain/model"
-	"werner-dijkerman.nl/test-setup/port/out"
 )
 
 // asasasasasa (These come from port/out/(interface))
-func (mc *mongodbConnection) Create(ctx context.Context, org *out.OrganisationOutPort) (*out.OrganisationOutPort, error) {
+func (mc *mongodbConnection) CreateOrganisation(ctx context.Context, org *model.Organization) (*model.Organization, error) {
 	var mdbCollection string = "organisation"
 	mc.Logging.Debug(fmt.Sprintf("About to Create Organisations %v", org))
 
 	name := org.GetName()
-	org = out.NewOrganisationOutPort(org.GetName(), org.GetDescription(), org.GetFqdn(), org.GetEnabled(), org.GetAdmins())
+	org = model.NewOrganization(org.GetName(), org.GetDescription(), org.GetFqdn(), org.GetEnabled(), org.GetAdmins())
 	coll := mc.SetupCollection(mdbCollection)
 
 	result := coll.FindOne(mc.Context, bson.M{"name": name})
@@ -32,7 +31,7 @@ func (mc *mongodbConnection) Create(ctx context.Context, org *out.OrganisationOu
 	return org, nil
 }
 
-func (mc *mongodbConnection) GetAll(ctx context.Context) (*model.ListOrganisations, error) {
+func (mc *mongodbConnection) GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, error) {
 	var mdbCollection string = "organisation"
 	mc.Logging.Debug("Get all available organisations")
 

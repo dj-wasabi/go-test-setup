@@ -6,9 +6,10 @@ import (
 	"werner-dijkerman.nl/test-setup/domain/model"
 )
 
-// TODO found in adapter/in/http/api/{organisations,}.go
+// TODO found in adapter/in/http/api/{organisations,authenticate,user}.go
 type ApiUseCases interface {
-	CreateOrganisation(ctx context.Context, c *OrganisationInPort) (*model.Organization, error)
+	CreateOrganisation(ctx context.Context, c *model.Organization) *model.Organization
 	GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, error)
-	AuthenticateLogin(ctx context.Context, username, password string)
+	AuthenticateLogin(ctx context.Context, username, password string) (*model.AuthenticationToken, error)
+	UserCreate(ctx context.Context, c *model.User) *model.User
 }

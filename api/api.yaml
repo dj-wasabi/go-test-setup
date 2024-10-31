@@ -8,6 +8,7 @@ info:
 tags:
   - name: Organisation
   - name: Authentication
+  - name: User
   - name: Dummy
 servers:
   - url: "http://localhost/api/v1"
@@ -83,7 +84,7 @@ paths:
           application/json:
             example: { "name": "Company Name", "Description": "This is an amazing Company", "fqdn": "https://www.amazing.com/pany", "admins": ["username1"] }
             schema:
-              $ref: "#/components/schemas/CreateOrganisationRequest"
+              $ref: "#/components/schemas/CompanyPayload"
         required: true
       responses:
         "201":
@@ -167,6 +168,44 @@ paths:
                 }
               schema:
                 $ref: "#/components/schemas/Error"
+  /user:
+    post:
+      summary: Create User Account
+      description: Create a User account
+      operationId: userCreate
+      tags:
+        - User
+      requestBody:
+        description: Authenticate
+        content:
+          application/json:
+            example: { "username": "My Name", "password": "verySecret!", "enabled": true, "roles": []}
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+        required: true
+      responses:
+        "201":
+          description: Successfully created user
+          headers:
+          content:
+            application/json:
+              example:
+                {
+                  "id": "some-uuid"
+                }
+              schema:
+                type: string
+                example: token
+        default:
+          description: Could not create user
+          content:
+            application/json:
+              example:
+                {
+                  "message": "Could not create user"
+                }
+              schema:
+                $ref: "#/components/schemas/Error"
   /test:
     get:
       summary: Listing dummy stuff
@@ -237,16 +276,6 @@ components:
       example: ["username1", "username2"]
       items:
         $ref: "#/components/schemas/Admin"
-    AdminsArrayType:
-      type: object
-      description: Payload for admins
-      example: { "admins": ["username1", "username2"] }
-      properties:
-        admins:
-          type: array
-          example: ["username1", "username2"]
-          items:
-            $ref: "#/components/schemas/Admin"
     AuthenticationRequest:
       type: object
       description: Authenticate
@@ -305,17 +334,36 @@ components:
         - $ref: "#/components/schemas/ObjectId"
         - $ref: "#/components/schemas/CompanyPayload"
         - $ref: "#/components/schemas/AdminsArray"
-    CreateOrganisationRequest:
-      description: Request to create an organisation
-      allOf:
-        - $ref: "#/components/schemas/AdminsArrayType"
-        - $ref: "#/components/schemas/CompanyPayload"
+    UserCreateRequest:
+      type: object
+      description: Authenticate
+      required:
+        - username
+        - password
+      example:
+        {
+          "username": "My Name",
+          "password": "verySecret!",
+          "enabled": true,
+          "roles": []
+        }
+      properties:
+        username:
+          type: string
+          example: username1
+        password:
+          type: string
+          example: password
+        enabled:
+          type: boolean
+          example: true
+        roles:
+          type: array
+          example: ["username1", "username2"]
     Error:
       type: object
       description: Error response
       required:
-        # - requestId
-        # - code
         - message
       example:
         {
@@ -340,26 +388,3 @@ components:
         message:
           type: string
           example: An error occurred
-    # TagsResponse:
-    #   description: List of tags
-    #   type: array
-    #   example:
-    #     [{ "id": "12345678-1234-1234-1234-1234567890ab", "name": "tag1" }]
-    #   items:
-    #     $ref: "#/components/schemas/TagResponse"
-    # TagResponse:
-    #   description: A single tag
-    #   type: object
-    #   required:
-    #     - id
-    #     - name
-    #   example: { "id": "12345678-1234-1234-1234-1234567890ab", "name": "tag1" }
-    #   properties:
-    #     id:
-    #       type: string
-    #       format: uuid
-    #       example: "12345678-1234-1234-1234-1234567890ab"
-    #     name:
-    #       type: string
-    #       example: name
-    #       pattern: "[A-Za-z0-9_-\\s]{3,50}"

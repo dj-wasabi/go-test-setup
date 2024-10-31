@@ -22,8 +22,8 @@ type mongodbConnection struct {
 	// Cancel  context.CancelFunc
 }
 
-func NewMongoDBConnection(c *config.Config) out.OrganisationsDBPort {
-	return connectServer(c)
+func NewMongoDBConnection(c *config.Config) (out.PortOrganisation, out.PortUser) {
+	return connectServer(c), connectServer(c)
 }
 
 func connectDBString(mc *config.Config) string {
@@ -84,7 +84,7 @@ func (mc *mongodbConnection) pingServer(client *mongo.Client, ctx context.Contex
 func (mc *mongodbConnection) SetupCollection(col string) *mongo.Collection {
 	_, err := mc.pingServer(mc.Client, mc.Context)
 	if err != nil {
-		// mc.Logging.Error(fmt.Sprintf("Mongo DB ping issue %s", err.Error()))
+		mc.Logging.Error(fmt.Sprintf("Mongo DB ping issue %s", err.Error()))
 		con := connectServer(mc.Config)
 		collection := con.Client.Database(mc.Config.Database.Dbname).Collection(col)
 		return collection
