@@ -15,7 +15,8 @@ http:
     write: 30
 
 database:
-  hostname: 192.168.101.4
+  # hostname: 192.168.101.4
+  hostname: localhost
   port: 27017
   
   username: 

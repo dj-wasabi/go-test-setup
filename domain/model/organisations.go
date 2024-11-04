@@ -12,14 +12,14 @@ type ListOrganisations struct {
 }
 
 type Organization struct {
-	ID          string    `json:"id,omitempty" bson:"_id"`
-	Name        string    `json:"name" bson:"name"`
-	Description string    `json:"description" bson:"description"`
-	Enabled     bool      `json:"enabled" bson:"enabled"`
-	CreatedAt   time.Time `json:"-" bson:"created_at"`
-	UpdatedAt   time.Time `json:"-" bson:"updated_at"`
-	Fqdn        string    `json:"fqdn" bson:"fqdn"`
-	Admins      []string  `json:"admins,omitempty" bson:"admins"`
+	ID          string    `json:"id,omitempty"`
+	Name        string    `json:"name"`
+	Description string    `json:"description,omitempty"`
+	Enabled     bool      `json:"enabled"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Fqdn        string    `json:"fqdn"`
+	Admins      []string  `json:"admins,omitempty"`
 }
 
 type IOrganisation interface {

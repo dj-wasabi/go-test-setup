@@ -19,7 +19,6 @@ type mongodbConnection struct {
 	Logging *slog.Logger
 	Client  *mongo.Client
 	Context context.Context
-	// Cancel  context.CancelFunc
 }
 
 func NewMongoDBConnection(c *config.Config) (out.PortOrganisation, out.PortUser) {
@@ -57,7 +56,6 @@ func connectServer(c *config.Config) *mongodbConnection {
 		Logging: logger,
 		Client:  client,
 		Context: ctx,
-		// Cancel:  cancel,
 	}
 
 	return con
@@ -71,21 +69,12 @@ func (mc *mongodbConnection) pingServer(client *mongo.Client, ctx context.Contex
 	return true, nil
 }
 
-// func (mc *mongodbConnection) SetupCollection(col string) (*mongo.Collection, *mongo.Client, context.Context, context.CancelFunc) {
-// 	_, err := mc.pingServer(mc.Client, mc.Context)
-// 	if err != nil {
-// 		mc.Logging.Error(fmt.Sprintf("Mongo DB ping issue %s", err.Error()))
-// 	}
-
-// 	collection := mc.Client.Database(mc.Config.Database.Dbname).Collection(col)
-// 	return collection, client, ctx, cancel
-// }
-
 func (mc *mongodbConnection) SetupCollection(col string) *mongo.Collection {
 	_, err := mc.pingServer(mc.Client, mc.Context)
 	if err != nil {
 		mc.Logging.Error(fmt.Sprintf("Mongo DB ping issue %s", err.Error()))
 		con := connectServer(mc.Config)
+		mc.Logging.Error("Trying to get another connection")
 		collection := con.Client.Database(mc.Config.Database.Dbname).Collection(col)
 		return collection
 	}
@@ -96,21 +85,5 @@ func (mc *mongodbConnection) SetupCollection(col string) *mongo.Collection {
 
 func (mc *mongodbConnection) VerifyServer() bool {
 	_, _ = mc.pingServer(mc.Client, mc.Context)
-
-	// if err != nil {
-	// 	mc.Logging.Error(fmt.Sprintf("Mongo DB ping issue %s", err.Error()))
-	// 	return false
-	// }
-
-	// defer mc.CloseConnection(mc.Cancel)
 	return true
 }
-
-// func (mc *mongodbConnection) CloseConnection(cancel context.CancelFunc) {
-// 	defer func() {
-// 		cancel()
-// 		if err := mc.Client.Disconnect(mc.Context); err != nil {
-// 			mc.Logging.Error(err.Error())
-// 		}
-// 	}()
-// }

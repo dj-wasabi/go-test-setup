@@ -10,11 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"werner-dijkerman.nl/test-setup/domain/model"
+	"werner-dijkerman.nl/test-setup/port/out"
 )
 
 // asasasasasa (These come from port/out/(interface))
-func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*model.User, error) {
+func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*out.UserPort, error) {
 	var mdbCollection string = "user"
 	mc.Logging.Debug(fmt.Sprintf("About to Create Organisations %v", username))
 
@@ -27,7 +27,7 @@ func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*m
 		return nil, result.Err()
 	}
 
-	user := new(*model.User)
+	user := new(*out.UserPort)
 	err := result.Decode(&user)
 	if err != nil {
 		log.Fatal(err)

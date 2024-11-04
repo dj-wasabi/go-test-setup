@@ -8,13 +8,13 @@ import (
 )
 
 type User struct {
-	ID        string    `json:"id,omitempty" bson:"_id"`
-	Username  string    `json:"username" bson:"username"`
-	Password  string    `json:"-" bson:"password"`
-	Enabled   bool      `json:"enabled" bson:"enabled"`
-	CreatedAt time.Time `json:"-" bson:"created_at"`
-	UpdatedAt time.Time `json:"-" bson:"updated_at"`
-	Roles     []string  `json:"roles,omitempty" bson:"roles"`
+	Id        string
+	Username  string
+	Password  string
+	Enabled   bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Roles     []string
 }
 
 type IUser interface {
@@ -26,7 +26,7 @@ type IUser interface {
 }
 
 func (o *User) GetId() string {
-	return o.ID
+	return o.Id
 }
 
 func (o *User) GetUsername() string {

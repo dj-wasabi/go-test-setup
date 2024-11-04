@@ -6,13 +6,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"werner-dijkerman.nl/test-setup/domain/model"
+	"werner-dijkerman.nl/test-setup/port/in"
 )
 
 // cs.uc --> domain/services/organisation
 
 func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 	cs.log.Debug("Ceate an organisation")
-	var e model.Organization
+	var e in.OrganisationIn
 	if err := c.ShouldBindJSON(&e); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -23,7 +24,13 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 
 func (cs *ApiHandler) GetAllOrganisations(c *gin.Context, params GetAllOrganisationsParams) {
 	cs.log.Info("Get all organisations")
+	// AllOrganisations := &in.ListOrganisationsIn{}
+	// AllOrganisations := &model.ListOrganisations{}
 	data, _ := cs.uc.GetAllOrganisations(context.Background())
+
+	// for i := range data {
+	// 	AllOrganisations = append(AllOrganisations.Organisations, i)
+	// }
 
 	c.JSON(http.StatusOK, data)
 }

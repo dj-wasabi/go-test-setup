@@ -16,6 +16,8 @@ import (
 	"werner-dijkerman.nl/test-setup/port/in"
 )
 
+type envelope map[string]any
+
 type ApiHandler struct {
 	uc  in.ApiUseCases
 	log *slog.Logger
