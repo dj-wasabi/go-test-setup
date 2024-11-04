@@ -3,7 +3,7 @@ package in
 import (
 	"context"
 
-	"werner-dijkerman.nl/test-setup/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 )
 
 // TODO found in adapter/in/http/api/{organisations,authenticate,user}.go

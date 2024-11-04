@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"werner-dijkerman.nl/test-setup/port/out"
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
 // asasasasasa (These come from port/out/(interface))

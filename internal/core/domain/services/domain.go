@@ -3,9 +3,9 @@ package services
 import (
 	"log/slog"
 
+	"werner-dijkerman.nl/test-setup/internal/core/port/in"
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
-	"werner-dijkerman.nl/test-setup/port/in"
-	"werner-dijkerman.nl/test-setup/port/out"
 )
 
 type domainServices struct {

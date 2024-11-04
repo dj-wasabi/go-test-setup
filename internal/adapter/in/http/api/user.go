@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"werner-dijkerman.nl/test-setup/domain/model"
-	"werner-dijkerman.nl/test-setup/port/in"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 )
 
 // cs.uc --> domain/services/organisation

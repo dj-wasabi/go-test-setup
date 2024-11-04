@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"werner-dijkerman.nl/test-setup/domain/model"
-	"werner-dijkerman.nl/test-setup/port/out"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
 func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.Organization) *model.Organization {

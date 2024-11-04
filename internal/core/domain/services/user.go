@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"werner-dijkerman.nl/test-setup/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
-	"werner-dijkerman.nl/test-setup/port/out"
 )
 
 func (c *domainServices) UserCreate(ctx context.Context, command *model.User) string {

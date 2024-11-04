@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
-	"werner-dijkerman.nl/test-setup/port/out"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"werner-dijkerman.nl/test-setup/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 

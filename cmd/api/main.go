@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"werner-dijkerman.nl/test-setup/adapter/in/http/api"
-	"werner-dijkerman.nl/test-setup/adapter/out/mongodb"
-	"werner-dijkerman.nl/test-setup/domain/services"
+	"werner-dijkerman.nl/test-setup/internal/adapter/in/http/api"
+	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/services"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
 )

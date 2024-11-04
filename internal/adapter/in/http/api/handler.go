@@ -11,9 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
+	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
-	"werner-dijkerman.nl/test-setup/port/in"
 )
 
 type envelope map[string]any
