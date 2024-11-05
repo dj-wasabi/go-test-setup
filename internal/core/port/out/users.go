@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 )
 
 type UserPort struct {
@@ -68,7 +69,7 @@ func NewUser(username, password string, enabled bool, roles []string) *UserPort 
 
 // TODO found in adapter/out/mongodb/{organisations,authenticate}.go
 type PortUser interface {
-	Create(ctx context.Context, user *UserPort) string
+	Create(ctx context.Context, user *UserPort) (string, *model.Error)
 	GetByName(username string, ctx context.Context) (*UserPort, error)
 	UpdateToken(ctx context.Context, token, username string) bool
 }

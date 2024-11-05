@@ -1,0 +1,14 @@
+[{
+  "createIndexes": "organisations",
+  "indexes": [
+    {
+      "key": {
+        "name": 1,
+        "fqdn": 1
+      },
+      "name": "unique_name_fqdn_idx",
+      "unique": true,
+      "background": true
+    }
+  ]
+}]

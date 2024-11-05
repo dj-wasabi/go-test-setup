@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 )
 
 type OrganizationPort struct {
@@ -65,6 +66,6 @@ func NewOrganization(name, description, fqdn string, enabled bool, admins []stri
 
 // TODO found in adapter/out/mongodb/{organisations,authenticate}.go
 type PortOrganisation interface {
-	CreateOrganisation(ctx context.Context, org *OrganizationPort) (*OrganizationPort, error)
-	GetAllOrganisations(ctx context.Context) ([]*OrganizationPort, error)
+	CreateOrganisation(ctx context.Context, org *OrganizationPort) (*OrganizationPort, *model.Error)
+	GetAllOrganisations(ctx context.Context) ([]*OrganizationPort, *model.Error)
 }

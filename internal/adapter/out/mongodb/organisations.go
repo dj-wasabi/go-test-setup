@@ -2,35 +2,42 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
 // asasasasasa (These come from port/out/(interface))
-func (mc *mongodbConnection) CreateOrganisation(ctx context.Context, org *out.OrganizationPort) (*out.OrganizationPort, error) {
-	var mdbCollection string = "organisation"
-	mc.Logging.Debug(fmt.Sprintf("About to Create Organisations %v", org))
 
-	name := org.GetName()
+func (mc *mongodbConnection) CreateOrganisation(ctx context.Context, org *out.OrganizationPort) (*out.OrganizationPort, *model.Error) {
+	var mdbCollection string = "organisations"
+
 	org = out.NewOrganization(org.GetName(), org.GetDescription(), org.GetFqdn(), org.GetEnabled(), org.GetAdmins())
 	coll := mc.SetupCollection(mdbCollection)
+	mc.Logging.Debug(fmt.Sprintf("We have the following name %v", org.Name))
 
-	result := coll.FindOne(mc.Context, bson.M{"name": name})
-	mc.Logging.Info(fmt.Sprintf("%v", result.Err()))
-	if result.Err() == mongo.ErrNoDocuments {
-		mc.Logging.Info(org.Name)
-		_, _ = coll.InsertOne(context.TODO(), org)
+	_, err := coll.InsertOne(context.TODO(), org)
+	if err != nil {
+		var write_exc mongo.WriteException
+		if !errors.As(err, &write_exc) {
+			mc.Logging.Error(fmt.Sprintf("%v", err))
+			return nil, model.GetError("UNKNOWN")
+		}
+
+		if write_exc.HasErrorCodeWithMessage(11000, "index: unique_name_fqdn_idx") {
+			mc.Logging.Error(fmt.Sprintf("User '%v' already exist, unique index violation.", org.Name))
+			return nil, model.GetError("ORG0001")
+		}
 	}
-
 	return org, nil
 }
 
-func (mc *mongodbConnection) GetAllOrganisations(ctx context.Context) ([]*out.OrganizationPort, error) {
-	var mdbCollection string = "organisation"
+func (mc *mongodbConnection) GetAllOrganisations(ctx context.Context) ([]*out.OrganizationPort, *model.Error) {
+	var mdbCollection string = "organisations"
 	mc.Logging.Debug("Get all available organisations")
 
 	coll := mc.SetupCollection(mdbCollection)
@@ -41,16 +48,17 @@ func (mc *mongodbConnection) GetAllOrganisations(ctx context.Context) ([]*out.Or
 		mc.Logging.Error("No document found")
 	} else if err != nil {
 		mc.Logging.Error(fmt.Sprintf("Error in mongo %v", err.Error()))
+		return nil, model.GetError("UNKNOWN")
 	}
 
 	for cursor.Next(mc.Context) {
 		result := new(out.OrganizationPort)
 		err := cursor.Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			mc.Logging.Error(fmt.Sprintf("Not able to decode database result with message: %v", err.Error()))
 		}
 		AllOrganisations = append(AllOrganisations, result)
 	}
 
-	return AllOrganisations, err
+	return AllOrganisations, model.GetError("UNKNOWN")
 }

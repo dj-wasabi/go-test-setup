@@ -18,10 +18,9 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	message := cs.uc.UserCreate(context.Background(), model.NewUser(u.GetUsername(), u.GetPassword(), u.GetEnabled(), u.GetRoles()))
-	if message == "duplicate" {
-		output := envelope{"error": "Duplicate account"}
-		c.AbortWithStatusJSON(http.StatusConflict, output)
+	message, err := cs.uc.UserCreate(context.Background(), model.NewUser(u.GetUsername(), u.GetPassword(), u.GetEnabled(), u.GetRoles()))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusConflict, err)
 	} else {
 		output := envelope{"id": message}
 		c.JSON(http.StatusOK, output)

@@ -18,25 +18,22 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cs.uc.CreateOrganisation(context.Background(), model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
-	c.JSON(http.StatusOK, e)
+	result, err := cs.uc.CreateOrganisation(context.Background(), model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 func (cs *ApiHandler) GetAllOrganisations(c *gin.Context, params GetAllOrganisationsParams) {
 	cs.log.Info("Get all organisations")
-	// AllOrganisations := &in.ListOrganisationsIn{}
-	// AllOrganisations := &model.ListOrganisations{}
 	data, _ := cs.uc.GetAllOrganisations(context.Background())
-
-	// for i := range data {
-	// 	AllOrganisations = append(AllOrganisations.Organisations, i)
-	// }
 
 	c.JSON(http.StatusOK, data)
 }
 
 func (cs *ApiHandler) ListTags(c *gin.Context) {
-	// cs.log.Debug("About to Create an Experience")
 	var e model.Organization
 	if err := c.ShouldBindJSON(&e); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

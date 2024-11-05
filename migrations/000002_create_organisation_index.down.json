@@ -1,0 +1,6 @@
+[
+  {
+    "dropIndexes": "organisations",
+    "index": "unique_name_idx"
+  }
+]

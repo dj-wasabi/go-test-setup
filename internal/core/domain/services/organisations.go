@@ -2,25 +2,37 @@ package services
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
-func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.Organization) *model.Organization {
+func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.Organization) (*model.Organization, *model.Error) {
 	org := out.NewOrganization(command.Name, command.Description, command.Fqdn, command.Enabled, command.Admins)
 	org, err := c.org.CreateOrganisation(context.Background(), org)
 	if err != nil {
-		log.Fatalf("%v", err)
+		return nil, err
 	}
-	return model.NewOrganization(org.GetName(), org.GetDescription(), org.GetFqdn(), org.GetEnabled(), org.GetAdmins())
+
+	newOrg := &model.Organization{
+		Name:        org.Name,
+		Description: org.Description,
+		UpdatedAt:   org.UpdatedAt,
+		CreatedAt:   org.CreatedAt,
+		Admins:      org.Admins,
+		Fqdn:        org.Fqdn,
+	}
+
+	return newOrg, nil
 }
 
-func (c *domainServices) GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, error) {
-	allOrgs, err := c.org.GetAllOrganisations(ctx)
+func (c *domainServices) GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, *model.Error) {
+	allOrgs, err := c.org.GetAllOrganisations(context.Background())
 	if err != nil {
-		log.Fatalf("%v", err)
+		err = &model.Error{
+			Message: fmt.Sprintf("%v", err),
+		}
 	}
 
 	AllOrganisations := &model.ListOrganisations{}

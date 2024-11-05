@@ -3,7 +3,6 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,7 +14,7 @@ import (
 
 // asasasasasa (These come from port/out/(interface))
 func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*out.UserPort, error) {
-	var mdbCollection string = "user"
+	var mdbCollection string = "users"
 	mc.Logging.Debug(fmt.Sprintf("About to Create Organisations %v", username))
 
 	coll := mc.SetupCollection(mdbCollection)
@@ -30,14 +29,14 @@ func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*o
 	user := new(*out.UserPort)
 	err := result.Decode(&user)
 	if err != nil {
-		log.Fatal(err)
+		mc.Logging.Error("error")
 	}
 
 	return *user, nil
 }
 
 func (mc *mongodbConnection) UpdateToken(ctx context.Context, token, username string) bool {
-	var mdbCollection string = "user"
+	var mdbCollection string = "users"
 	var updateObj primitive.D
 	coll := mc.SetupCollection(mdbCollection)
 
