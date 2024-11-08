@@ -17,6 +17,6 @@ func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cs.uc.AuthenticateLogin(context.Background(), e.GetUsername(), e.GetPassword())
-	c.JSON(http.StatusOK, e)
+	token, _ := cs.uc.AuthenticateLogin(context.Background(), e.GetUsername(), e.GetPassword())
+	c.JSON(http.StatusOK, token)
 }

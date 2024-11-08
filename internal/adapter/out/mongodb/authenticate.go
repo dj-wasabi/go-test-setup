@@ -13,7 +13,7 @@ import (
 )
 
 // asasasasasa (These come from port/out/(interface))
-func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*out.UserPort, error) {
+func (mc *MongodbConnection) GetByName(username string, ctx context.Context) (*out.UserPort, error) {
 	var mdbCollection string = "users"
 	mc.Logging.Debug(fmt.Sprintf("About to Create Organisations %v", username))
 
@@ -35,7 +35,7 @@ func (mc *mongodbConnection) GetByName(username string, ctx context.Context) (*o
 	return *user, nil
 }
 
-func (mc *mongodbConnection) UpdateToken(ctx context.Context, token, username string) bool {
+func (mc *MongodbConnection) UpdateToken(ctx context.Context, token, username string) bool {
 	var mdbCollection string = "users"
 	var updateObj primitive.D
 	coll := mc.SetupCollection(mdbCollection)

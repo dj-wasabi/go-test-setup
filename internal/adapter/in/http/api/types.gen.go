@@ -7,6 +7,10 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
 // Admin A username
 type Admin struct {
 	User *string `json:"user,omitempty"`

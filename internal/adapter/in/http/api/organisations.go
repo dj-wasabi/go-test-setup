@@ -33,11 +33,7 @@ func (cs *ApiHandler) GetAllOrganisations(c *gin.Context, params GetAllOrganisat
 	c.JSON(http.StatusOK, data)
 }
 
+// dummy endpoint to just validate the authentication part
 func (cs *ApiHandler) ListTags(c *gin.Context) {
-	var e model.Organization
-	if err := c.ShouldBindJSON(&e); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	cs.uc.CreateOrganisation(context.Background(), model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
+	c.JSON(http.StatusOK, gin.H{"error": "Ik heb hier ook geen data!"})
 }

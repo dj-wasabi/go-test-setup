@@ -16,6 +16,7 @@ type UserPort struct {
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 	Roles     []string           `bson:"roles"`
+	Token     string             `bson:"token"`
 }
 
 type IUser interface {
@@ -26,6 +27,7 @@ type IUser interface {
 	GetCreated() time.Time
 	GetUpdated() time.Time
 	GetRoles() []string
+	GetToken() string
 }
 
 func (o *UserPort) GetId() primitive.ObjectID {
@@ -54,6 +56,10 @@ func (o *UserPort) GetUpdated() time.Time {
 
 func (o *UserPort) GetRoles() []string {
 	return o.Roles
+}
+
+func (o *UserPort) GetToken() string {
+	return o.Token
 }
 
 func NewUser(username, password string, enabled bool, roles []string) *UserPort {

@@ -22,9 +22,9 @@ func main() {
 
 	c := config.ReadConfig()
 
-	org, usr := mongodb.NewMongoDBConnection(c)
+	org, usr := mongodb.NewMongodbConnection(c)
 	h := services.NewdomainServices(org, usr)
-	server := api.NewGinServer(api.NewApiService(h), c)
+	server := api.NewGinServer(usr, api.NewApiService(h), c)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

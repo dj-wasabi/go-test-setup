@@ -1,5 +1,5 @@
 package: api
-output: ./adapter/in/http/api/server.gen.go
+output: ./internal/adapter/in/http/api/server.gen.go
 generate:
   strict-server: true
   gin-server: true

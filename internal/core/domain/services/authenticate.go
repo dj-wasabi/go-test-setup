@@ -7,28 +7,28 @@ import (
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
-func (c *domainServices) AuthenticateLogin(ctx context.Context, username, password string) (*model.AuthenticationToken, error) {
+func (c *domainServices) AuthenticateLogin(ctx context.Context, username, password string) (*model.AuthenticationToken, *model.Error) {
 	user, err := c.usr.GetByName(username, ctx)
 	if err != nil {
-		return nil, err
+		return nil, model.GetError("USR0002")
 	}
-
-	// result := new(*out.AuthenticationToken)
 
 	verifyPassword := utils.ValidatePassword(password, user.Password)
 	if !verifyPassword {
-		return nil, err
+		return nil, model.GetError("USR0002")
 	}
 
 	token, err := utils.GenerateToken(username)
 	if err != nil {
-		return nil, err
+		myError := &model.Error{
+			Message: err.Error(),
+		}
+		return nil, myError
 	}
 	isUpdated := c.usr.UpdateToken(ctx, token, username)
 	if !isUpdated {
-		return nil, err
+		return nil, model.GetError("AUTH002")
 	}
-	// token, err := out.NewAuthenticationToken(pizza)
 
 	tokens := &model.AuthenticationToken{
 		Token: token,

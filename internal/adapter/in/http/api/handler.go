@@ -1,7 +1,7 @@
 package api
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"log/slog"
 	"net"
@@ -9,9 +9,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
+	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
 	"werner-dijkerman.nl/test-setup/internal/core/port/in"
+	intmid "werner-dijkerman.nl/test-setup/internal/middleware"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
 )
@@ -30,7 +33,13 @@ func NewApiService(s in.ApiUseCases) *ApiHandler {
 	}
 }
 
-func NewGinServer(h *ApiHandler, c *config.Config) *http.Server {
+func NewAuthenticator(mc *mongodb.MongodbConnection, h *ApiHandler) openapi3filter.AuthenticationFunc {
+	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+		return intmid.ValidateSecurityScheme(mc, ctx, input)
+	}
+}
+
+func NewGinServer(mc *mongodb.MongodbConnection, h *ApiHandler, c *config.Config) *http.Server {
 	swagger, err := GetSwagger()
 
 	if err != nil {
@@ -45,11 +54,19 @@ func NewGinServer(h *ApiHandler, c *config.Config) *http.Server {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(jsonLoggerMiddleware())
+	r.Use(intmid.JsonLoggerMiddleware())
+
+	r.Use(middleware.OapiRequestValidatorWithOptions(swagger,
+		&middleware.Options{
+			Options: openapi3filter.Options{
+				AuthenticationFunc: NewAuthenticator(mc, h),
+			},
+		},
+	))
 
 	// Use our validation middleware to check all requests against the
 	// OpenAPI schema.
-	r.Use(middleware.OapiRequestValidator(swagger))
+	// r.Use(middleware.OapiRequestValidator(swagger))
 	RegisterHandlers(r, h)
 
 	s := &http.Server{
@@ -61,25 +78,4 @@ func NewGinServer(h *ApiHandler, c *config.Config) *http.Server {
 		ErrorLog:     slog.NewLogLogger(h.log.Handler(), slog.LevelError),
 	}
 	return s
-}
-
-func jsonLoggerMiddleware() gin.HandlerFunc {
-	return gin.LoggerWithFormatter(
-		func(params gin.LogFormatterParams) string {
-			log := make(map[string]interface{})
-
-			log["time"] = params.TimeStamp.Format("2006-01-02 15:04:05")
-			log["status_code"] = params.StatusCode
-			log["path"] = params.Path
-			log["method"] = params.Method
-			log["remote_addr"] = params.ClientIP
-			log["user_agent"] = params.Request.UserAgent()
-			log["referer"] = params.Request.Referer()
-			// time endresult is logged in milliseconds: 1000943 == 1 second.
-			log["duration"] = time.Duration(params.Latency) / 1000
-
-			s, _ := json.Marshal(log)
-			return string(s) + "\n"
-		},
-	)
 }

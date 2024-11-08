@@ -13,7 +13,7 @@ import (
 
 // asasasasasa (These come from port/out/(interface))
 
-func (mc *mongodbConnection) CreateOrganisation(ctx context.Context, org *out.OrganizationPort) (*out.OrganizationPort, *model.Error) {
+func (mc *MongodbConnection) CreateOrganisation(ctx context.Context, org *out.OrganizationPort) (*out.OrganizationPort, *model.Error) {
 	var mdbCollection string = "organisations"
 
 	org = out.NewOrganization(org.GetName(), org.GetDescription(), org.GetFqdn(), org.GetEnabled(), org.GetAdmins())
@@ -36,7 +36,7 @@ func (mc *mongodbConnection) CreateOrganisation(ctx context.Context, org *out.Or
 	return org, nil
 }
 
-func (mc *mongodbConnection) GetAllOrganisations(ctx context.Context) ([]*out.OrganizationPort, *model.Error) {
+func (mc *MongodbConnection) GetAllOrganisations(ctx context.Context) ([]*out.OrganizationPort, *model.Error) {
 	var mdbCollection string = "organisations"
 	mc.Logging.Debug("Get all available organisations")
 
