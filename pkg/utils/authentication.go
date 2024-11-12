@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -50,7 +49,7 @@ func GenerateToken(username string) (signedToken string, err error) {
 
 func GetBearerToken(log *slog.Logger, req *http.Request) (string, error) {
 	authHdr := req.Header.Get("Authorization")
-	log.Info("bladiebla", "token info", fmt.Sprintf("%v", authHdr))
+	log.Debug("bladiebla")
 	if authHdr == "" {
 		return "", ErrNoAuthHeader
 	}
@@ -62,22 +61,6 @@ func GetBearerToken(log *slog.Logger, req *http.Request) (string, error) {
 
 	return strings.TrimPrefix(authHdr, prefix), nil
 }
-
-// func checkTokenClaims(expectedClaims []string, t AuthenticationDetails) error {
-// 	claims := strings.Split(t.Scope, " ")
-// 	claimsMap := make(map[string]bool, len(claims))
-// 	for _, c := range claims {
-// 		claimsMap[c] = true
-// 	}
-
-// 	for _, e := range expectedClaims {
-// 		if !claimsMap[e] {
-// 			return ErrClaimsInvalid
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 func HashPassword(password *string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(*password), 14)

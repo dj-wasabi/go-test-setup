@@ -26,20 +26,20 @@ type ApiHandler struct {
 	log *slog.Logger
 }
 
-func NewApiService(s in.ApiUseCases) *ApiHandler {
+func NewApiService(as in.ApiUseCases) *ApiHandler {
 	return &ApiHandler{
-		uc:  s,
+		uc:  as,
 		log: logging.Initialize(),
 	}
 }
 
-func NewAuthenticator(mc out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
+func NewAuthenticator(po out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
 	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-		return intmid.ValidateSecurityScheme(mc, l, ctx, input)
+		return intmid.ValidateSecurityScheme(po, l, ctx, input)
 	}
 }
 
-func NewGinServer(mc out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
+func NewGinServer(po out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
 	swagger, err := GetSwagger()
 
 	if err != nil {
@@ -59,7 +59,7 @@ func NewGinServer(mc out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logg
 	r.Use(middleware.OapiRequestValidatorWithOptions(swagger,
 		&middleware.Options{
 			Options: openapi3filter.Options{
-				AuthenticationFunc: NewAuthenticator(mc, h, l),
+				AuthenticationFunc: NewAuthenticator(po, h, l),
 			},
 		},
 	))

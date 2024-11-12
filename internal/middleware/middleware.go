@@ -36,7 +36,7 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 	)
 }
 
-func ValidateSecurityScheme(mc out.PortUser, l *slog.Logger, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 	l.Info("Getting a validation Security Scheme request")
 	clientToken, err := utils.GetBearerToken(l, input.RequestValidationInput.Request)
 	if err != nil {
@@ -50,9 +50,7 @@ func ValidateSecurityScheme(mc out.PortUser, l *slog.Logger, ctx context.Context
 		return errors.New(myError.Message)
 	}
 
-	// coll := mc.Client.Database(mc.Config.Database.Dbname).Collection("users"))
-
-	user, _ := mc.GetByName(claims.Username, context.TODO())
+	user, _ := po.GetByName(claims.Username, ctx)
 	if clientToken == user.Token {
 		return nil
 	} else {
