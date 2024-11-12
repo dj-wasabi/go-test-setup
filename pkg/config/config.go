@@ -46,12 +46,16 @@ type logging struct {
 
 type timeout struct {
 	Idle  int `yaml:"idle" env:"HTTP_TIMEOUT_IDLE"`
-	Read  int `yaml:"read"`
-	Write int `yaml:"write"`
+	Read  int `yaml:"read" env:"HTTP_TIMEOUT_READ"`
+	Write int `yaml:"write" env:"HTTP_TIMEOUT_WRITE"`
 }
 
 func loadConfig() (*Config, error) {
-	yamlFile, err := os.ReadFile("config.yaml")
+	logfilePath := os.Getenv("LOGFILE_PATH")
+	if logfilePath == "" {
+		logfilePath = "config.yaml"
+	}
+	yamlFile, err := os.ReadFile(logfilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +69,7 @@ func loadConfig() (*Config, error) {
 	_ = env.Parse(&configInstance.Http.Timeout)
 	_ = env.Parse(&configInstance.Http.Cors)
 	_ = env.Parse(&configInstance.Database)
-	_ = env.Parse(&configInstance.Logging.Level)
+	_ = env.Parse(&configInstance.Logging)
 
 	return configInstance, nil
 }

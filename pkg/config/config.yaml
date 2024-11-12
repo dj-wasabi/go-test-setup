@@ -1,0 +1,19 @@
+---
+# Testing
+http:
+  cors:
+    host: http://localhost:8888
+  listen: 8888
+  timeout:
+    idle: 10
+    read: 10
+    write: 30
+
+database:
+  hostname: localhost
+  username: username
+  password: password
+  dbname: mongo-golang-test
+
+logging:
+  level: info

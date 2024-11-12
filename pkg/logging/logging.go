@@ -31,7 +31,7 @@ func parseLogLevel(logLevelString string) slog.Level {
 	}
 }
 
-func load() *slog.Logger {
+func Load() *slog.Logger {
 	c := config.ReadConfig()
 	logLevel := parseLogLevel(c.Logging.Level)
 
@@ -44,7 +44,7 @@ func load() *slog.Logger {
 
 func Initialize() *slog.Logger {
 	once.Do(func() {
-		logger = load()
+		logger = Load()
 	})
 	return logger
 }

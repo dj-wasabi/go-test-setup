@@ -22,9 +22,17 @@ func main() {
 
 	c := config.ReadConfig()
 
-	org, usr := mongodb.NewMongodbConnection(c)
-	h := services.NewdomainServices(org, usr)
-	server := api.NewGinServer(usr, api.NewApiService(h), c)
+	con := mongodb.NewMongodbConnection(c)
+	repoUser := mongodb.NewUserMongoRepo(con, "users")
+	repoOrg := mongodb.NewOrganisationMongoRepo(con, "organisations")
+
+	serviceUser := mongodb.NewUserMongoService(repoUser, logger)
+	serviceOrganisation := mongodb.NewOrganisationMongoService(repoOrg, logger)
+
+	h := services.NewdomainServices(serviceOrganisation, serviceUser)
+
+	server := api.NewGinServer(serviceUser, api.NewApiService(h), c, logger)
+	server.ListenAndServe()
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

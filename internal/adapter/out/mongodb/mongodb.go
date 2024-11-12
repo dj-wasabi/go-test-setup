@@ -3,41 +3,36 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"log/slog"
-
-	"werner-dijkerman.nl/test-setup/pkg/config"
-	"werner-dijkerman.nl/test-setup/pkg/logging"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"werner-dijkerman.nl/test-setup/pkg/config"
+	"werner-dijkerman.nl/test-setup/pkg/logging"
 )
 
-type MongodbConnection struct {
-	Config  *config.Config
-	Logging *slog.Logger
-	Client  *mongo.Client
-	Context context.Context
+type MongodbRepository struct {
+	DB         *mongo.Database
+	Collection *mongo.Collection
 }
 
-func NewMongodbConnection(c *config.Config) (*MongodbConnection, *MongodbConnection) {
-	return connectServer(c), connectServer(c)
+func NewMongodbConnection(c *config.Config) *mongo.Database {
+	return connectServer(c)
 }
 
-func connectDBString(mc *config.Config) string {
+func connectDBString(c *config.Config) string {
 	var connectString = "mongodb://"
 
-	if mc.Database.Username != "" {
-		connectString = connectString + mc.Database.Username
+	if c.Database.Username != "" {
+		connectString = connectString + c.Database.Username
 	}
-	if mc.Database.Password != "" {
-		connectString = connectString + ":" + mc.Database.Password + "@"
+	if c.Database.Password != "" {
+		connectString = connectString + ":" + c.Database.Password + "@"
 	}
-	connectString = connectString + mc.Database.Hostname + ":" + fmt.Sprintf("%v", mc.Database.Port)
+	connectString = connectString + c.Database.Hostname + ":" + fmt.Sprintf("%v", c.Database.Port)
 	return connectString
 }
 
-func connectServer(c *config.Config) *MongodbConnection {
+func connectServer(c *config.Config) *mongo.Database {
 	logger := logging.Initialize()
 
 	ctx := context.Background()
@@ -46,40 +41,6 @@ func connectServer(c *config.Config) *MongodbConnection {
 	if err != nil {
 		logger.Error(fmt.Sprintf("Mongo DB Connect issue %s", err.Error()))
 	}
-
-	con := &MongodbConnection{
-		Config:  c,
-		Logging: logger,
-		Client:  client,
-		Context: ctx,
-	}
-
-	return con
-}
-
-func (mc *MongodbConnection) pingServer(client *mongo.Client, ctx context.Context) (bool, error) {
-	err := client.Ping(ctx, readpref.Primary())
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func (mc *MongodbConnection) SetupCollection(col string) *mongo.Collection {
-	_, err := mc.pingServer(mc.Client, mc.Context)
-	if err != nil {
-		mc.Logging.Error(fmt.Sprintf("Mongo DB ping issue %s", err.Error()))
-		con := connectServer(mc.Config)
-		mc.Logging.Error("Trying to get another connection")
-		collection := con.Client.Database(mc.Config.Database.Dbname).Collection(col)
-		return collection
-	}
-
-	collection := mc.Client.Database(mc.Config.Database.Dbname).Collection(col)
-	return collection
-}
-
-func (mc *MongodbConnection) VerifyServer() bool {
-	_, _ = mc.pingServer(mc.Client, mc.Context)
-	return true
+	// Connect to the correct database
+	return client.Database(c.Database.Dbname)
 }

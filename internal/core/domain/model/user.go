@@ -45,7 +45,7 @@ func (o *User) GetRoles() []string {
 	return o.Roles
 }
 
-func NewUser(username, password string, enabled bool, roles []string) *User {
+func NewUser(username, password string, enabled bool, roles []string) (*User, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	e := &User{
@@ -59,7 +59,7 @@ func NewUser(username, password string, enabled bool, roles []string) *User {
 	err := validate.Struct(e)
 	if err != nil {
 		fmt.Println(err.Error())
-		return &User{}
+		return &User{}, err
 	}
-	return e
+	return e, err
 }

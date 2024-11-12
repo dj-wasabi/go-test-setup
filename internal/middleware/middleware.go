@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
-	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
@@ -35,21 +36,23 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 	)
 }
 
-func ValidateSecurityScheme(mc *mongodb.MongodbConnection, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-	mc.Logging.Info("Getting a validation Security Scheme request")
-	clientToken, err := utils.GetBearerToken(mc.Logging, input.RequestValidationInput.Request)
+func ValidateSecurityScheme(mc out.PortUser, l *slog.Logger, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+	l.Info("Getting a validation Security Scheme request")
+	clientToken, err := utils.GetBearerToken(l, input.RequestValidationInput.Request)
 	if err != nil {
-		mc.Logging.Error(fmt.Sprintf("%v", err.Error()))
+		l.Error(fmt.Sprintf("%v", err.Error()))
 		return err
 	}
 
-	claims, err := utils.ValidateToken(mc.Logging, clientToken)
+	claims, err := utils.ValidateToken(l, clientToken)
 	if err != nil {
 		myError := model.GetError("AUTH001")
 		return errors.New(myError.Message)
 	}
 
-	user, _ := mc.GetByName(claims.Username, ctx)
+	// coll := mc.Client.Database(mc.Config.Database.Dbname).Collection("users"))
+
+	user, _ := mc.GetByName(claims.Username, context.TODO())
 	if clientToken == user.Token {
 		return nil
 	} else {
@@ -57,5 +60,3 @@ func ValidateSecurityScheme(mc *mongodb.MongodbConnection, ctx context.Context, 
 		return errors.New(myError.Message)
 	}
 }
-
-// do some magic with mongodb database, getting token from user

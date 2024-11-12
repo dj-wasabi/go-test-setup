@@ -12,8 +12,8 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
-	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
 	"werner-dijkerman.nl/test-setup/internal/core/port/in"
+	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	intmid "werner-dijkerman.nl/test-setup/internal/middleware"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
@@ -33,13 +33,13 @@ func NewApiService(s in.ApiUseCases) *ApiHandler {
 	}
 }
 
-func NewAuthenticator(mc *mongodb.MongodbConnection, h *ApiHandler) openapi3filter.AuthenticationFunc {
+func NewAuthenticator(mc out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
 	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-		return intmid.ValidateSecurityScheme(mc, ctx, input)
+		return intmid.ValidateSecurityScheme(mc, l, ctx, input)
 	}
 }
 
-func NewGinServer(mc *mongodb.MongodbConnection, h *ApiHandler, c *config.Config) *http.Server {
+func NewGinServer(mc out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
 	swagger, err := GetSwagger()
 
 	if err != nil {
@@ -59,7 +59,7 @@ func NewGinServer(mc *mongodb.MongodbConnection, h *ApiHandler, c *config.Config
 	r.Use(middleware.OapiRequestValidatorWithOptions(swagger,
 		&middleware.Options{
 			Options: openapi3filter.Options{
-				AuthenticationFunc: NewAuthenticator(mc, h),
+				AuthenticationFunc: NewAuthenticator(mc, h, l),
 			},
 		},
 	))
