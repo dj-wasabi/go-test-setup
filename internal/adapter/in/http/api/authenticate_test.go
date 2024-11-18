@@ -44,14 +44,12 @@ func prepareTest(t *testing.T) {
 	os.Setenv("LOGFILE_PATH", "../../../../../config.yaml")
 }
 
-func prepareMongoService(mt *mtest.T, l *slog.Logger) {
+func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
 	repoUser = mongodb.NewUserMongoRepo(mt.DB, "users")
 	serviceUser = mongodb.NewUserMongoService(repoUser, l)
 	_ = config.ReadConfig()
 	token, _ = utils.GenerateToken("myusername")
-}
 
-func prepareMongoUser(mt *mtest.T) {
 	myUser = out.UserPort{
 		ID:        primitive.NewObjectID(),
 		Username:  "myusername",
@@ -74,7 +72,7 @@ func prepareMongoUser(mt *mtest.T) {
 		}))
 }
 
-func setandpreparegin() {
+func prepareGin() {
 	router = gin.New()
 	gin.SetMode(gin.TestMode)
 
@@ -88,9 +86,8 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 
 	mongoTest.Run("authenticate", func(mt *mtest.T) {
 
-		prepareMongoService(mt, logging.Initialize())
-		prepareMongoUser(mt)
-		setandpreparegin()
+		prepareMongoDB(mt, logging.Initialize())
+		prepareGin()
 
 		authRequest = model.AuthenticationRequest{
 			Username: myUser.Username,
@@ -116,9 +113,8 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 
 	mongoTest.Run("authenticate", func(mt *mtest.T) {
 
-		prepareMongoService(mt, logging.Initialize())
-		prepareMongoUser(mt)
-		setandpreparegin()
+		prepareMongoDB(mt, logging.Initialize())
+		prepareGin()
 
 		authRequest = model.AuthenticationRequest{
 			Username: myUser.Username,
