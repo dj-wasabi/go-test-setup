@@ -8,7 +8,7 @@ type AuthenticationRequest struct {
 }
 
 type AuthenticationToken struct {
-	Token string
+	Token string `json:"token" validate:"required"`
 }
 
 type Authentication interface {

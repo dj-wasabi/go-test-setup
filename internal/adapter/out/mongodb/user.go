@@ -62,7 +62,6 @@ func (uc *userService) GetByName(username string, ctx context.Context) (*out.Use
 	uc.logging.Debug(fmt.Sprintf("About to Create Organisations %v", username))
 
 	result := uc.repository.Collection.FindOne(ctx, bson.M{"username": username})
-	uc.logging.Info(fmt.Sprintf("%v", result.Err()))
 	if result.Err() == mongo.ErrNoDocuments {
 		uc.logging.Info(fmt.Sprintf("User '%v' not found.", username))
 		return nil, result.Err()
