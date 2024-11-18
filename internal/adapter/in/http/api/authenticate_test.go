@@ -35,6 +35,7 @@ var (
 	serviceOrganisation out.PortOrganisation
 	authToken           *model.AuthenticationToken
 	authRequest         model.AuthenticationRequest
+	authError           model.Error
 	myUser              out.UserPort
 	token               string
 )
@@ -99,7 +100,6 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
-
 		err := json.NewDecoder(rec.Body).Decode(&authToken)
 
 		assert.NoError(t, err)
@@ -126,12 +126,10 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
-
-		var authToken *model.Error
-		err := json.NewDecoder(rec.Body).Decode(&authToken)
+		err := json.NewDecoder(rec.Body).Decode(&authError)
 
 		assert.NoError(t, err)
-		assert.Equal(t, authToken.Message, "Invalid username/password combination")
+		assert.Equal(t, authError.Message, "Invalid username/password combination")
 	})
 
 }
