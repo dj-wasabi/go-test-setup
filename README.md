@@ -1,5 +1,7 @@
 # go-test-setup
 
+A personal test project to learn golang and try to set it up in a hexagon architecture setup.
+
 
 
 

@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,64 +18,91 @@ import (
 	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/services"
+	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
-func Test_Authenticatelogin_Ok(t *testing.T) {
-	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
+var (
+	handler             *ApiHandler
+	router              *gin.Engine
+	mongoTest           *mtest.T
+	domainService       in.ApiUseCases
+	repoUser            *mongodb.MongodbRepository
+	serviceUser         out.PortUser
+	serviceOrganisation out.PortOrganisation
+	authToken           *model.AuthenticationToken
+	authRequest         model.AuthenticationRequest
+	myUser              out.UserPort
+	token               string
+)
+
+func prepareTest(t *testing.T) {
+	mongoTest = mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 	os.Setenv("LOGFILE_PATH", "../../../../../config.yaml")
+}
 
-	mt.Run("authenticate", func(mt *mtest.T) {
+func prepareMongoService(mt *mtest.T, l *slog.Logger) {
+	repoUser = mongodb.NewUserMongoRepo(mt.DB, "users")
+	serviceUser = mongodb.NewUserMongoService(repoUser, l)
+	_ = config.ReadConfig()
+	token, _ = utils.GenerateToken("myusername")
+}
 
-		repoUser := mongodb.NewUserMongoRepo(mt.DB, "users")
-		serviceUser := mongodb.NewUserMongoService(repoUser, logging.Initialize())
-		token, _ := utils.GenerateToken("myusername")
+func prepareMongoUser(mt *mtest.T) {
+	myUser = out.UserPort{
+		ID:        primitive.NewObjectID(),
+		Username:  "myusername",
+		Password:  "$2a$14$flIjKE7ywigEp8c5.7TFru8OKiTXMz0TG21TmwL8jfmnvMOHvj0Oi",
+		Enabled:   true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Token:     token,
+	}
 
-		myUser := &out.UserPort{
-			ID:        primitive.NewObjectID(),
-			Username:  "myusername",
-			Password:  "$2a$14$flIjKE7ywigEp8c5.7TFru8OKiTXMz0TG21TmwL8jfmnvMOHvj0Oi",
-			Enabled:   true,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Token:     token,
-		}
+	mt.AddMockResponses(mtest.CreateCursorResponse(1, "testdb.users", mtest.FirstBatch,
+		bson.D{
+			{Key: "_id", Value: myUser.ID},
+			{Key: "username", Value: myUser.Username},
+			{Key: "password", Value: myUser.Password},
+			{Key: "enabled", Value: myUser.Enabled},
+			{Key: "created_at", Value: myUser.CreatedAt},
+			{Key: "updated_at", Value: myUser.UpdatedAt},
+			{Key: "token", Value: myUser.Token},
+		}))
+}
 
-		mt.AddMockResponses(mtest.CreateCursorResponse(1, "testdb.users", mtest.FirstBatch,
-			bson.D{
-				{Key: "_id", Value: myUser.ID},
-				{Key: "username", Value: myUser.Username},
-				{Key: "password", Value: myUser.Password},
-				{Key: "enabled", Value: myUser.Enabled},
-				{Key: "created_at", Value: myUser.CreatedAt},
-				{Key: "updated_at", Value: myUser.UpdatedAt},
-				{Key: "token", Value: myUser.Token},
-			}))
-		_ = config.ReadConfig()
+func setandpreparegin() {
+	router = gin.New()
+	gin.SetMode(gin.TestMode)
 
-		r := gin.New()
-		gin.SetMode(gin.TestMode)
-		var serviceOrganisation out.PortOrganisation
+	domainService = services.NewdomainServices(serviceOrganisation, serviceUser)
+	handler = NewApiService(domainService)
+	RegisterHandlers(router, handler)
+}
 
-		ds := services.NewdomainServices(serviceOrganisation, serviceUser)
-		h := NewApiService(ds)
-		RegisterHandlers(r, h)
+func Test_Authenticatelogin_Ok(t *testing.T) {
+	prepareTest(t)
 
-		body := model.AuthenticationRequest{
+	mongoTest.Run("authenticate", func(mt *mtest.T) {
+
+		prepareMongoService(mt, logging.Initialize())
+		prepareMongoUser(mt)
+		setandpreparegin()
+
+		authRequest = model.AuthenticationRequest{
 			Username: myUser.Username,
 			Password: "mysecretpassword",
 		}
-		b, _ := json.Marshal(body)
+		b, _ := json.Marshal(authRequest)
 		req, _ := http.NewRequest("POST", "/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
 
 		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
+		router.ServeHTTP(rec, req)
 
-		var authToken *model.AuthenticationToken
 		err := json.NewDecoder(rec.Body).Decode(&authToken)
 
 		assert.NoError(t, err)
@@ -84,55 +112,24 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 }
 
 func Test_Authenticatelogin_NotOk(t *testing.T) {
-	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	os.Setenv("LOGFILE_PATH", "../../../../../config.yaml")
+	prepareTest(t)
 
-	mt.Run("authenticate", func(mt *mtest.T) {
+	mongoTest.Run("authenticate", func(mt *mtest.T) {
 
-		repoUser := mongodb.NewUserMongoRepo(mt.DB, "users")
-		serviceUser := mongodb.NewUserMongoService(repoUser, logging.Initialize())
-		token, _ := utils.GenerateToken("myusername")
+		prepareMongoService(mt, logging.Initialize())
+		prepareMongoUser(mt)
+		setandpreparegin()
 
-		myUser := &out.UserPort{
-			ID:        primitive.NewObjectID(),
-			Username:  "myusername",
-			Password:  "$2a$14$flIjKE7ywigEp8c5.7TFru8OKiTXMz0TG21TmwL8jfmnvMOHvj0Oi",
-			Enabled:   true,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Token:     token,
-		}
-
-		mt.AddMockResponses(mtest.CreateCursorResponse(1, "testdb.users", mtest.FirstBatch,
-			bson.D{
-				{Key: "_id", Value: myUser.ID},
-				{Key: "username", Value: myUser.Username},
-				{Key: "password", Value: myUser.Password},
-				{Key: "enabled", Value: myUser.Enabled},
-				{Key: "created_at", Value: myUser.CreatedAt},
-				{Key: "updated_at", Value: myUser.UpdatedAt},
-				{Key: "token", Value: myUser.Token},
-			}))
-		_ = config.ReadConfig()
-
-		r := gin.New()
-		gin.SetMode(gin.TestMode)
-		var serviceOrganisation out.PortOrganisation
-
-		ds := services.NewdomainServices(serviceOrganisation, serviceUser)
-		h := NewApiService(ds)
-		RegisterHandlers(r, h)
-
-		body := model.AuthenticationRequest{
+		authRequest = model.AuthenticationRequest{
 			Username: myUser.Username,
 			Password: "mysecretpasswor",
 		}
-		b, _ := json.Marshal(body)
+		b, _ := json.Marshal(authRequest)
 		req, _ := http.NewRequest("POST", "/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
 
 		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
+		router.ServeHTTP(rec, req)
 
 		var authToken *model.Error
 		err := json.NewDecoder(rec.Body).Decode(&authToken)
