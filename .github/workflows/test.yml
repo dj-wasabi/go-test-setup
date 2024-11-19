@@ -12,14 +12,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Install dependencies
+
+      - name: Generate model structs
+        run: go generate internal/core/port/in/model-generator.go
+
+      - name: Generate Server related functions
+        run: go generate internal/adapter/in/http/api/server-generator.go
+
+      - name: Build Application
         run: go build -o ./api ./cmd/api
+
       - name: Test with Go
         run: go test ./... -json > TestResults-${{ matrix.go-version }}.json
+
       - name: Upload Go test results
         uses: actions/upload-artifact@v4
         with:
