@@ -2,11 +2,6 @@ package model
 
 import "github.com/go-playground/validator/v10"
 
-type AuthenticationRequest struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
-
 type AuthenticationToken struct {
 	Token string `json:"token" validate:"required"`
 }

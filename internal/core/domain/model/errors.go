@@ -1,10 +1,5 @@
 package model
 
-type Error struct {
-	// Code    string `json:"code"`
-	Message string `json:"error"`
-}
-
 var ErrorCodes = map[string]string{
 	"UNKNOWN": "Unkown error message",
 	"ORG0001": "Duplicate organisation",

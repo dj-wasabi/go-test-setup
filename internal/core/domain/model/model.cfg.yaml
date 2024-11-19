@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=../../../configuration-schema.json
-package: in
+package: model
 output: ./models.gen.go
 generate:
   models: true
