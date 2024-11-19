@@ -4,3 +4,4 @@ generate:
   strict-server: true
   gin-server: true
   embedded-spec: true
+  models: true

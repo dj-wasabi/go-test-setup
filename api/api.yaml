@@ -9,11 +9,12 @@ tags:
   - name: Organisation
   - name: Authentication
   - name: User
+  - name: System
   - name: Dummy
 servers:
-  - url: "http://localhost/api/v1"
+  - url: "http://localhost/v1"
 paths:
-  /organisations:
+  /v1/organisations:
     get:
       description: Returns all organisations
       summary: Returns all organisations
@@ -123,7 +124,7 @@ paths:
                 }
               schema:
                 $ref: "#/components/schemas/Error"
-  /auth/login:
+  /v1/auth/login:
     post:
       summary: Authenticate
       description: Authenticate so we can get a token and do stuff
@@ -168,7 +169,7 @@ paths:
                 }
               schema:
                 $ref: "#/components/schemas/Error"
-  /user:
+  /v1/user:
     post:
       summary: Create User Account
       description: Create a User account
@@ -208,17 +209,7 @@ paths:
               schema:
                 type: string
                 example: message
-        # default:
-        #   description: Could not create user
-        #   content:
-        #     application/json:
-        #       example:
-        #         {
-        #           "message": "Could not create user"
-        #         }
-        #       schema:
-        #         $ref: "#/components/schemas/Error"
-  /test:
+  /v1/test:
     get:
       summary: Listing dummy stuff
       description: A dummy things right now
@@ -264,6 +255,34 @@ paths:
                 }
               schema:
                 $ref: "#/components/schemas/Error"
+  /v1/health:
+    get:
+      summary: Health
+      description: Returns the health of the application
+      operationId: getHealth
+      tags:
+        - System
+      responses:
+        "200":
+          description: Healty information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsResponse"
+  /v1/metrics:
+    get:
+      summary: Metrics
+      description: Returns all metrics
+      operationId: getMetrics
+      tags:
+        - System
+      responses:
+        "200":
+          description: Metrics for Prometheus
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsResponse"
 components:
   securitySchemes:
     BearerAuth:
@@ -346,6 +365,10 @@ components:
         ]
       items:
         $ref: "#/components/schemas/Organisation"
+    MetricsResponse:
+      description: Metrics for Prometheus response
+      example: "Unknown"
+      type: string
     Organisation:
       description: An existing organisation
       allOf:

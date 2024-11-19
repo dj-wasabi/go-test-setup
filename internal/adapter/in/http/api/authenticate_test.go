@@ -95,7 +95,7 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 			Password: "mysecretpassword",
 		}
 		b, _ := json.Marshal(authRequest)
-		req, _ := http.NewRequest("POST", "/auth/login", bytes.NewReader(b))
+		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
 
 		rec := httptest.NewRecorder()
@@ -121,7 +121,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 			Password: "mysecretpasswor",
 		}
 		b, _ := json.Marshal(authRequest)
-		req, _ := http.NewRequest("POST", "/auth/login", bytes.NewReader(b))
+		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
 
 		rec := httptest.NewRecorder()
