@@ -12,6 +12,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
+	"github.com/prometheus/client_golang/prometheus"
 	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	intmid "werner-dijkerman.nl/test-setup/internal/middleware"
@@ -20,6 +21,14 @@ import (
 )
 
 type envelope map[string]any
+
+var (
+	authentication_requests_per_state = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "authentication_requests_per_state",
+		Help: "A histogram of authentications request durations in seconds per state.",
+	},
+		[]string{"state"})
+)
 
 type ApiHandler struct {
 	uc  in.ApiUseCases
@@ -31,6 +40,11 @@ func NewApiService(as in.ApiUseCases) *ApiHandler {
 		uc:  as,
 		log: logging.Initialize(),
 	}
+}
+
+func RegisterMetrics() {
+	prometheus.Register(authentication_requests_per_state)
+
 }
 
 func NewAuthenticator(po out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
@@ -63,10 +77,11 @@ func NewGinServer(po out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logg
 			},
 		},
 	))
+	// Register metrics
+	RegisterMetrics()
 
 	// Use our validation middleware to check all requests against the
 	// OpenAPI schema.
-	// r.Use(middleware.OapiRequestValidator(swagger))
 	RegisterHandlers(r, h)
 
 	s := &http.Server{
