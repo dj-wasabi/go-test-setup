@@ -33,8 +33,8 @@ var (
 	repoUser            *mongodb.MongodbRepository
 	serviceUser         out.PortUser
 	serviceOrganisation out.PortOrganisation
-	authToken           *model.AuthenticationToken
-	authRequest         model.AuthenticationRequest
+	authToken           *model.AuthenticatePostResponse
+	authRequest         model.AuthenticatePostRequest
 	authError           model.Error
 	myUser              out.UserPort
 	token               string
@@ -90,7 +90,7 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 		prepareMongoDB(mt, logging.Initialize())
 		prepareGin()
 
-		authRequest = model.AuthenticationRequest{
+		authRequest = model.AuthenticatePostRequest{
 			Username: myUser.Username,
 			Password: "mysecretpassword",
 		}
@@ -116,7 +116,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		prepareMongoDB(mt, logging.Initialize())
 		prepareGin()
 
-		authRequest = model.AuthenticationRequest{
+		authRequest = model.AuthenticatePostRequest{
 			Username: myUser.Username,
 			Password: "mysecretpasswor",
 		}

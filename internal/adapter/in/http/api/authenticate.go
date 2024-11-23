@@ -23,7 +23,7 @@ var (
 // cs.uc --> domain/services/authentication.go
 
 func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
-	var e model.AuthenticationRequest
+	var e model.AuthenticatePostRequest
 	if err := c.ShouldBindJSON(&e); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

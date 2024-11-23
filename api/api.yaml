@@ -10,7 +10,6 @@ tags:
   - name: Authentication
   - name: User
   - name: System
-  - name: Dummy
 servers:
   - url: "http://localhost/v1"
 paths:
@@ -19,6 +18,8 @@ paths:
       description: Returns all organisations
       summary: Returns all organisations
       operationId: GetAllOrganisations
+      security:
+        - BearerAuth: []
       tags:
         - Organisation
       parameters:
@@ -44,7 +45,7 @@ paths:
             example: 100
       responses:
         "200":
-          description: A paged array of pets
+          description: A paged overview of all organisations
           headers:
             X-NEXT:
               example: "http://localhost/api/v1/organisations?page=2&size=25"
@@ -58,70 +59,40 @@ paths:
                 type: string
           content:
             application/json:
-              example: []
               schema:
-                $ref: "#/components/schemas/GetAllOrganisations"
+                $ref: "#/components/schemas/OrganisationsGetResponse"
         default:
           description: unexpected error
           content:
             application/json:
-              example:
-                {
-                  "requestId": "12345678-1234-1234-1234-1234567890ab",
-                  "code": "EPE000001",
-                  "message": "An error occurred",
-                }
               schema:
                 $ref: "#/components/schemas/Error"
     post:
       summary: Create an organisation
       description: Create an organisation
       operationId: createOrganisation
+      security:
+        - BearerAuth: []
       tags:
         - Organisation
       requestBody:
         description: Organisation to add
         content:
           application/json:
-            example: { "name": "Company Name", "Description": "This is an amazing Company", "fqdn": "https://www.amazing.com/pany", "admins": ["username1"] }
             schema:
-              $ref: "#/components/schemas/CompanyPayload"
+              $ref: "#/components/schemas/OrganisationPostRequest"
         required: true
       responses:
         "201":
-          description: Empty response
-          headers:
-            X-OBJECT-ID:
-              example: "12345678-1234-1234-1234-1234567890ab"
-              description: ObjectIO of the create organisation
-              schema:
-                type: string
-            X-CORRELATION-ID:
-              example: "12345678-1234-1234-1234-1234567890ab"
-              description: Id of the correlation
-              schema:
-                type: string
-            Content-Location:
-              example: "http://localhost/v1/organisations/12345678-1234-1234-1234-1234567890ab"
-              description: Link to the created organisations
-              schema:
-                type: string
-        default:
-          description: When create fails
-          headers:
-            X-CORRELATION-ID:
-              example: 12345678-1234-1234-1234-1234567890ab
-              description: Id of the correlation of the create organisation request
-              schema:
-                type: string
+          description: Successful creation of an organisation
           content:
             application/json:
-              example:
-                {
-                  "requestId": "12345678-1234-1234-1234-1234567890ab",
-                  "code": "EPE000002",
-                  "message": "Create failed",
-                }
+              schema:
+                $ref: "#/components/schemas/OrganisationPostResponse"
+        default:
+          description: When create fails
+          content:
+            application/json:
               schema:
                 $ref: "#/components/schemas/Error"
   /v1/auth/login:
@@ -137,12 +108,11 @@ paths:
           application/json:
             example: { "username": "My Name", "password": "verySecret!"}
             schema:
-              $ref: "#/components/schemas/AuthenticationRequest"
+              $ref: "#/components/schemas/AuthenticatePostRequest"
         required: true
       responses:
         "200":
           description: Expected response to a valid request
-          headers:
           content:
             application/json:
               example:
@@ -150,39 +120,32 @@ paths:
                   "token": "my.jwt.example"
                 }
               schema:
-                type: string
-                example: token
-        default:
-          description: Could not find organisation
-          headers:
-            X-CORRELATION-ID:
-              example: "12345678-1234-1234-1234-1234567890ab"
-              description: Id of the correlation of the get organisation by id request error
-              schema:
-                type: string
-                example: "12345678-1234-1234-1234-1234567890ab"
+                $ref: "#/components/schemas/AuthenticatePostResponse"
+        "403":
+          description: Unsuccesfull authentication attempt
           content:
             application/json:
               example:
                 {
-                  "message": "Could not find organisation"
+                  "message": "Invalid username/password combination"
                 }
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticatePostResponseError"
   /v1/user:
     post:
       summary: Create User Account
       description: Create a User account
       operationId: userCreate
+      security:
+        - BearerAuth: []
       tags:
         - User
       requestBody:
-        description: Authenticate
+        description: Create a user
         content:
           application/json:
-            example: { "username": "My Name", "password": "verySecret!", "enabled": true, "roles": []}
             schema:
-              $ref: "#/components/schemas/UserCreateRequest"
+              $ref: "#/components/schemas/UserPostRequest"
         required: true
       responses:
         "201":
@@ -190,13 +153,8 @@ paths:
           headers:
           content:
             application/json:
-              example:
-                {
-                  "id": "some-uuid"
-                }
               schema:
-                type: string
-                example: token
+                $ref: "#/components/schemas/UserPostResponse"
         "409":
           description: User already exist
           headers:
@@ -208,53 +166,7 @@ paths:
                 }
               schema:
                 type: string
-                example: message
-  /v1/test:
-    get:
-      summary: Listing dummy stuff
-      description: A dummy things right now
-      operationId: listTags
-      security:
-        - BearerAuth: []
-      tags:
-        - Dummy
-      responses:
-        "200":
-          description: An array of tags
-          headers:
-            X-CORRELATION-ID:
-              example: "12345678-1234-1234-1234-1234567890ab"
-              description: Id of the get tags request
-              schema:
-                type: string
-          content:
-            application/json:
-              example:
-                [
-                  {
-                    "id": "12345678-1234-1234-1234-1234567890ab",
-                    "name": "tag1",
-                  },
-                ]
-              schema:
-                $ref: "#/components/schemas/Dummy"
-        default:
-          description: Could not find tags
-          headers:
-            X-CORRELATION-ID:
-              example: "12345678-1234-1234-1234-1234567890ab"
-              description: Id of the correlation of the get tags request error
-              schema:
-                type: string
-                example: "12345678-1234-1234-1234-1234567890ab"
-          content:
-            application/json:
-              example:
-                {
-                  "message": "Could not find tags"
-                }
-              schema:
-                $ref: "#/components/schemas/Error"
+                example: duplicate account
   /v1/health:
     get:
       summary: Health
@@ -268,7 +180,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MetricsResponse"
+                $ref: "#/components/schemas/MetricsGetResponse"
   /v1/metrics:
     get:
       summary: Metrics
@@ -279,51 +191,18 @@ paths:
       responses:
         "200":
           description: Metrics for Prometheus
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MetricsResponse"
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
   schemas:
-    ObjectId:
-      description: ObjectId
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "12345678-1234-1234-1234-1234567890ab"
-    Admin:
-      required:
-        - tag
-      description: A username
-      example: 
-      properties:
-        user:
-          example: username1
-          type: string
-          maxLength: 50
-          format: ".{1,50}"
-    AdminsArray:
-      type: array
-      description: Array of tags
-      example: ["username1", "username2"]
-      items:
-        $ref: "#/components/schemas/Admin"
-    AuthenticationRequest:
+    AuthenticatePostRequest:
       type: object
       description: Authenticate
       required:
         - username
         - password
-      example:
-        {
-          "username": "username",
-          "password": "very_secret!"
-        }
       properties:
         username:
           type: string
@@ -331,12 +210,27 @@ components:
         password:
           type: string
           example: password
-    CompanyPayload:
+    AuthenticatePostResponse:
       type: object
-      description: Payload for creating an organisation
-      example: { "name": "Company Name", "admins": ["username1", "username2"] }
+      description: Authenticate
       required:
-        - name
+        - token
+      properties:
+        token:
+          type: string
+          example: my.authenticated.token
+    AuthenticatePostResponseError:
+      type: object
+      description: Authenticate Error
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Invalid username/password combination
+    OrganisationPostRequest:
+      type: object
+      description: Response of creating an organisation
       properties:
         name:
           type: string
@@ -344,51 +238,80 @@ components:
         description:
           type: string
           example: Description of the company
+        enabled:
+          type: boolean
+          example: true
+          default: false
         fqdn:
           type: string
           example: FQDN of the environment
         admins:
           type: array
           example: ["username1", "username2"]
-    GetAllOrganisations:
+    OrganisationPostResponse:
+      type: object
+      description: Response of creating an organisation
+      properties:
+        name:
+          type: string
+          example: Name of the company
+        description:
+          type: string
+          example: Description of the company
+        enabled:
+          type: boolean
+          example: true
+          default: false
+        created_at:
+          type: string
+          example: 2024-10-23 13:01:10
+        updated_at:
+          type: string
+          example: 2024-10-23 13:01:11
+        fqdn:
+          type: string
+          example: FQDN of the environment
+        admins:
+          type: array
+          example: ["username1", "username2"]
+    OrganisationsGetResponse:
       type: array
       maxItems: 100
-      description: Array of Organisations
-      example:
-        [
-          {
-            "name": "Organisation Name",
-            "description": "This is an amazing company",
-            "fqdn": "www.my.com/pany",
-            "admins": ["username1", "username2"],
-          },
-        ]
+      description: Overview of all organisations
       items:
-        $ref: "#/components/schemas/Organisation"
-    MetricsResponse:
-      description: Metrics for Prometheus response
-      example: "Unknown"
-      type: string
-    Organisation:
-      description: An existing organisation
-      allOf:
-        - $ref: "#/components/schemas/ObjectId"
-        - $ref: "#/components/schemas/CompanyPayload"
-        - $ref: "#/components/schemas/AdminsArray"
-    UserCreateRequest:
+        $ref: "#/components/schemas/OrganisationGetRespone"
+    OrganisationGetRespone:
+      description: Get an Organisation
+      properties:
+        id:
+          type: string
+          example: username1
+        name:
+          type: string
+          example: password
+        description:
+          type: string
+          example: password
+        enabled:
+          type: boolean
+          example: false
+        fqdn:
+          type: string
+          example: www.my.com/panys
+        admins:
+          type: array
+          example: ["username1", "username2"]
+    UserPostRequest:
       type: object
-      description: Authenticate
+      description: Creating a user
       required:
+        - organisation_id
         - username
         - password
-      example:
-        {
-          "username": "My Name",
-          "password": "verySecret!",
-          "enabled": true,
-          "roles": []
-        }
       properties:
+        organisation_id:
+          type: string
+          example: oid
         username:
           type: string
           example: username1
@@ -398,28 +321,41 @@ components:
         enabled:
           type: boolean
           example: true
+          default: false
+        roles:
+          type: array
+          example: ["admin", "read"]
+          default: []
+    UserPostResponse:
+      type: object
+      description: Response object user creation
+      properties:
+        id:
+          type: string
+          example: 871279gu1b2
+        username:
+          type: string
+          example: username1
+        enabled:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          example: 2024-10-23 13:01:10
+        updated_at:
+          type: string
+          example: 2024-10-23 13:01:11
         roles:
           type: array
           example: ["username1", "username2"]
+    MetricsGetResponse:
+      description: Metrics for Prometheus response
+      example: "Unknown"
+      type: string
     Error:
       type: object
       description: Error response
       required:
-        - message
-      example:
-        {
-          "message": "An error occurred"
-        }
-      properties:
-        message:
-          type: string
-          example: An error occurred
-    Dummy:
-      type: object
-      description: Dummy response
-      required:
-        # - requestId
-        # - code
         - message
       example:
         {

@@ -8,7 +8,7 @@ import (
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
-func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password string) (*model.AuthenticationToken, *model.Error) {
+func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password string) (*model.AuthenticatePostResponse, *model.Error) {
 	user, err := c.usr.GetByName(username, ctx)
 	c.log.Debug(fmt.Sprintf("We have the '%v' username", username))
 	if err != nil {
@@ -35,7 +35,7 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 	// 	return nil, model.GetError("AUTH002")
 	// }
 
-	tokens := &model.AuthenticationToken{
+	tokens := &model.AuthenticatePostResponse{
 		Token: token,
 	}
 

@@ -2,33 +2,33 @@ package model
 
 import "github.com/go-playground/validator/v10"
 
-type AuthenticationToken struct {
-	Token string `json:"token" validate:"required"`
-}
+// type AuthenticationToken struct {
+// 	Token string `json:"token" validate:"required"`
+// }
 
 type Authentication interface {
 	GetUsername() string
 	GetPassword() string
 }
 
-func (a *AuthenticationRequest) GetUsername() string {
+func (a *AuthenticatePostRequest) GetUsername() string {
 	return a.Username
 }
 
-func (a *AuthenticationRequest) GetPassword() string {
+func (a *AuthenticatePostRequest) GetPassword() string {
 	return a.Password
 }
 
-func NewAuthenticationToken(token string) (*AuthenticationToken, error) {
+func NewAuthenticationToken(token string) (*AuthenticatePostResponse, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	t := &AuthenticationToken{
+	t := &AuthenticatePostResponse{
 		Token: token,
 	}
 
 	err := validate.Struct(t)
 	if err != nil {
-		return &AuthenticationToken{}, err
+		return &AuthenticatePostResponse{}, err
 	}
 	return t, nil
 }
