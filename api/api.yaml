@@ -132,12 +132,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthenticatePostResponseError"
   /v1/user:
+    get:
+      summary: Get all users
+      description: Get all users
+      operationId: GetMetrics2
+      security:
+        - BearerAuth: ["admin", "write", "readonly"]
+      tags:
+        - User
+      responses:
+        "200":
+          description: Successfully created user
+        "404":
+          description: Users not exist
+          content:
+            application/json:
+              example:
+                {
+                  "error": "duplicate account"
+                }
+              schema:
+                type: string
+                example: duplicate account
     post:
       summary: Create User Account
       description: Create a User account
       operationId: userCreate
       security:
-        - BearerAuth: []
+        - BearerAuth: ["admin", "write", "readonly"]
       tags:
         - User
       requestBody:
@@ -194,8 +216,15 @@ paths:
 components:
   securitySchemes:
     BearerAuth:
+      bearerFormat: JWT
       type: http
       scheme: bearer
+      flows:
+        authorizationCode:
+          scopes:
+            admin: Grants read access
+            write: Grants write access
+            readonly: Grants access to admin operations
   schemas:
     AuthenticatePostRequest:
       type: object

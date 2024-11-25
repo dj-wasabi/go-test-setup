@@ -49,7 +49,7 @@ func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
 	repoUser = mongodb.NewUserMongoRepo(mt.DB, "users")
 	serviceUser = mongodb.NewUserMongoService(repoUser, l)
 	_ = config.ReadConfig()
-	token, _ = utils.GenerateToken("myusername")
+	token, _ = utils.GenerateToken("myusername", "admin")
 
 	myUser = out.UserPort{
 		ID:        primitive.NewObjectID(),
@@ -58,6 +58,7 @@ func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
 		Enabled:   true,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+		Role:      "admin",
 		Token:     token,
 	}
 

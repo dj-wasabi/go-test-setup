@@ -20,7 +20,7 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 		return nil, model.GetError("USR0002")
 	}
 
-	token, err := utils.GenerateToken(username)
+	token, err := utils.GenerateToken(username, user.Role)
 	c.log.Debug(fmt.Sprintf("Generated a new token for the user with '%v' as username", username))
 	if err != nil {
 		myError := &model.Error{

@@ -14,6 +14,7 @@ import (
 
 type AuthenticationDetails struct {
 	Username string
+	Role     string
 	jwt.StandardClaims
 }
 
@@ -21,7 +22,7 @@ var (
 	ErrNoAuthHeader             = errors.New("authorization header is missing")
 	ErrInvalidAuthHeader        = errors.New("authorization header is malformed")
 	ErrInvalidToken             = errors.New("token is invalid")
-	ErrTokenExpired             = errors.New("the token is expired.")
+	ErrTokenExpired             = errors.New("the token is expired")
 	SECRET_KEY           string = os.Getenv("SECRET_KEY")
 )
 
@@ -34,10 +35,11 @@ func ValidatePassword(providedpassword, storedpassword string) bool {
 	return true
 }
 
-func GenerateToken(username string) (signedToken string, err error) {
+func GenerateToken(username, role string) (signedToken string, err error) {
 
 	claims := &AuthenticationDetails{
 		Username: username,
+		Role:     role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
 		},

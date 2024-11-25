@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -46,11 +47,16 @@ func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context
 
 	claims, err := utils.ValidateToken(l, clientToken)
 	if err != nil {
+		l.Debug(fmt.Sprintf("The '%v' has an incorrect token", claims.Username))
 		myError := model.GetError("AUTH001")
 		return errors.New(myError.Message)
 	}
 
-	// Validate the roles
+	if !slices.Contains(input.Scopes, claims.Role) {
+		l.Debug(fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", claims.Role))
+		myError := model.GetError("AUTH005")
+		return errors.New(myError.Message)
+	}
 
 	user, _ := po.GetByName(claims.Username, ctx)
 	if clientToken == user.Token {

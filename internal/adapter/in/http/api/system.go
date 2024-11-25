@@ -16,3 +16,7 @@ func (cs *ApiHandler) GetHealth(c *gin.Context) {
 func (cs *ApiHandler) GetMetrics(c *gin.Context) {
 	promhttp.Handler().ServeHTTP(c.Writer, c.Request)
 }
+
+func (cs *ApiHandler) GetMetrics2(c *gin.Context) {
+	promhttp.Handler().ServeHTTP(c.Writer, c.Request)
+}
