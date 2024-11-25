@@ -10,6 +10,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/oapi-codegen/gin-middleware v1.0.2
 	github.com/oapi-codegen/runtime v1.1.1
+	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.17.1
 	golang.org/x/crypto v0.29.0
@@ -26,7 +27,7 @@ require (
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.6 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.7 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
@@ -53,9 +54,8 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.20.5 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.60.1 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/speakeasy-api/openapi-overlay v0.9.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

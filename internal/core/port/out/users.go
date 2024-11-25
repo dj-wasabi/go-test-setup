@@ -15,7 +15,7 @@ type UserPort struct {
 	Enabled   bool               `bson:"enabled"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
-	Roles     []string           `bson:"roles"`
+	Role      string             `bson:"role"`
 	Token     string             `bson:"token"`
 }
 
@@ -26,7 +26,7 @@ type IUser interface {
 	GetEnabled() bool
 	GetCreated() time.Time
 	GetUpdated() time.Time
-	GetRoles() []string
+	GetRole() string
 	GetToken() string
 }
 
@@ -54,22 +54,22 @@ func (o *UserPort) GetUpdated() time.Time {
 	return o.UpdatedAt
 }
 
-func (o *UserPort) GetRoles() []string {
-	return o.Roles
+func (o *UserPort) GetRole() string {
+	return o.Role
 }
 
 func (o *UserPort) GetToken() string {
 	return o.Token
 }
 
-func NewUser(username, password string, enabled bool, roles []string) *UserPort {
+func NewUser(username, password, role string, enabled bool) *UserPort {
 	return &UserPort{
 		Username:  username,
 		Password:  password,
 		Enabled:   enabled,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Roles:     roles,
+		Role:      role,
 	}
 }
 

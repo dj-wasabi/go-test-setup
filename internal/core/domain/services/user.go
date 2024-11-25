@@ -11,7 +11,7 @@ import (
 func (c *domainServices) UserCreate(ctx context.Context, command *model.User) (string, *model.Error) {
 	encryptPassword, _ := utils.HashPassword(&command.Password)
 	command.Password = encryptPassword
-	user := out.NewUser(command.Username, command.Password, command.Enabled, command.Roles)
+	user := out.NewUser(command.Username, command.Password, command.Role, command.Enabled)
 	message, err := c.usr.Create(context.Background(), user)
 	return message, err
 }

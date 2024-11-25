@@ -14,7 +14,7 @@ type User struct {
 	Enabled   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Roles     []string
+	Role      string
 }
 
 type IUser interface {
@@ -22,7 +22,7 @@ type IUser interface {
 	GetUsername() string
 	GetPassword() string
 	GetEnabled() bool
-	GetRoles() []string
+	GetRole() string
 }
 
 func (o *User) GetId() string {
@@ -41,11 +41,11 @@ func (o *User) GetEnabled() bool {
 	return o.Enabled
 }
 
-func (o *User) GetRoles() []string {
-	return o.Roles
+func (o *User) GetRole() string {
+	return o.Role
 }
 
-func NewUser(username, password string, enabled bool, roles []string) (*User, error) {
+func NewUser(username, password, role string, enabled bool) (*User, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	e := &User{
@@ -54,7 +54,7 @@ func NewUser(username, password string, enabled bool, roles []string) (*User, er
 		Enabled:   enabled,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Roles:     roles,
+		Role:      role,
 	}
 	err := validate.Struct(e)
 	if err != nil {

@@ -322,10 +322,10 @@ components:
           type: boolean
           example: true
           default: false
-        roles:
-          type: array
-          example: ["admin", "read"]
-          default: []
+        role:
+          type: string
+          example: admin
+          default: ""
     UserPostResponse:
       type: object
       description: Response object user creation
@@ -345,9 +345,9 @@ components:
         updated_at:
           type: string
           example: 2024-10-23 13:01:11
-        roles:
-          type: array
-          example: ["username1", "username2"]
+        role:
+          type: string
+          example: admin
     MetricsGetResponse:
       description: Metrics for Prometheus response
       example: "Unknown"

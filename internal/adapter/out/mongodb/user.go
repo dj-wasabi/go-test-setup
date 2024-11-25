@@ -36,7 +36,7 @@ func NewUserMongoService(repo *MongodbRepository, log *slog.Logger) out.PortUser
 
 // asasasasasa (These come from port/out/(interface))
 func (uc *userService) Create(ctx context.Context, user *out.UserPort) (string, *model.Error) {
-	newUser, _ := model.NewUser(user.GetUsername(), user.GetPassword(), user.GetEnabled(), user.GetRoles())
+	newUser, _ := model.NewUser(user.GetUsername(), user.GetPassword(), user.GetRole(), user.GetEnabled())
 
 	uc.logging.Debug(fmt.Sprintf("Creating account with username '%v'", user.GetUsername()))
 	add, err := uc.repository.Collection.InsertOne(ctx, newUser)

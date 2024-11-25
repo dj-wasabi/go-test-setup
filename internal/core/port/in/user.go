@@ -11,7 +11,7 @@ type UserIn struct {
 	Enabled   bool      `json:"enabled"`
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
-	Roles     []string  `json:"roles"`
+	Role      string    `json:"role"`
 }
 
 type IUser interface {
@@ -21,7 +21,7 @@ type IUser interface {
 	GetEnabled() bool
 	GetCreated() time.Time
 	GetUpdated() time.Time
-	GetRoles() []string
+	GetRole() string
 }
 
 func (o *UserIn) GetId() string {
@@ -48,17 +48,17 @@ func (o *UserIn) GetUpdated() time.Time {
 	return o.UpdatedAt
 }
 
-func (o *UserIn) GetRoles() []string {
-	return o.Roles
+func (o *UserIn) GetRole() string {
+	return o.Role
 }
 
-func NewUserIn(username, password string, enabled bool, roles []string) *UserIn {
+func NewUserIn(username, password, role string, enabled bool) *UserIn {
 	return &UserIn{
 		Username:  username,
 		Password:  password,
 		Enabled:   enabled,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Roles:     roles,
+		Role:      role,
 	}
 }

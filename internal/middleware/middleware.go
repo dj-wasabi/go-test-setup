@@ -50,6 +50,8 @@ func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context
 		return errors.New(myError.Message)
 	}
 
+	// Validate the roles
+
 	user, _ := po.GetByName(claims.Username, ctx)
 	if clientToken == user.Token {
 		return nil
