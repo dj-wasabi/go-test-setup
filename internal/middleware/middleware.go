@@ -38,7 +38,6 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 }
 
 func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-	l.Info("Getting a validation Security Scheme request")
 	clientToken, err := utils.GetBearerToken(l, input.RequestValidationInput.Request)
 	if err != nil {
 		l.Error(fmt.Sprintf("%v", err.Error()))
@@ -54,7 +53,7 @@ func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context
 
 	if !slices.Contains(input.Scopes, claims.Role) {
 		l.Debug(fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", claims.Role))
-		myError := model.GetError("AUTH005")
+		myError := model.GetError("AUTH004")
 		return errors.New(myError.Message)
 	}
 

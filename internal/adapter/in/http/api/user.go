@@ -18,7 +18,7 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	input, _ := model.NewUser(u.GetUsername(), u.GetPassword(), u.GetRole(), u.GetEnabled())
+	input, _ := model.NewUser(u.GetUsername(), u.GetPassword(), u.GetRole(), u.GetEnabled(), u.GetOrgId())
 	message, err := cs.uc.UserCreate(context.Background(), input)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusConflict, err)
@@ -26,4 +26,8 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 		output := envelope{"id": message}
 		c.JSON(http.StatusOK, output)
 	}
+}
+
+func (cs *ApiHandler) GetUserByID(c *gin.Context, user string) {
+
 }

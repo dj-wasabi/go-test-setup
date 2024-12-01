@@ -8,18 +8,7 @@ import (
 )
 
 type ListOrganisations struct {
-	Organisations []Organization `json:"organisations"`
-}
-
-type Organization struct {
-	ID          string    `json:"id,omitempty"`
-	Name        string    `json:"name"`
-	Description string    `json:"description,omitempty"`
-	Enabled     bool      `json:"enabled"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Fqdn        string    `json:"fqdn"`
-	Admins      []string  `json:"admins,omitempty"`
+	Organisations []Organisation `json:"organisations"`
 }
 
 type IOrganisation interface {
@@ -31,34 +20,34 @@ type IOrganisation interface {
 	GetTags() []string
 }
 
-func (o *Organization) GetId() string {
-	return o.ID
+func (o *Organisation) GetId() string {
+	return o.Id
 }
 
-func (o *Organization) GetName() string {
+func (o *Organisation) GetName() string {
 	return o.Name
 }
 
-func (o *Organization) GetDescription() string {
+func (o *Organisation) GetDescription() string {
 	return o.Description
 }
 
-func (o *Organization) GetEnabled() bool {
+func (o *Organisation) GetEnabled() bool {
 	return o.Enabled
 }
 
-func (o *Organization) GetFqdn() string {
+func (o *Organisation) GetFqdn() string {
 	return o.Fqdn
 }
 
-func (o *Organization) GetAdmins() []string {
+func (o *Organisation) GetAdmins() []string {
 	return o.Admins
 }
 
-func NewOrganization(name, description, fqdn string, enabled bool, admins []string) *Organization {
+func NewOrganization(name, description, fqdn string, enabled bool, admins []string) *Organisation {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	e := &Organization{
+	e := &Organisation{
 		Name:        name,
 		Description: description,
 		Enabled:     enabled,
@@ -70,7 +59,7 @@ func NewOrganization(name, description, fqdn string, enabled bool, admins []stri
 	err := validate.Struct(e)
 	if err != nil {
 		fmt.Println(err.Error())
-		return &Organization{}
+		return &Organisation{}
 	}
 	return e
 }

@@ -1,4 +1,4 @@
-openapi: "3.0.0"
+openapi: "3.0.3"
 info:
   version: "1.0.0"
   title: Wernertie Dijkermannetjuhh
@@ -7,7 +7,9 @@ info:
     name: MIT
 tags:
   - name: Organisation
+    description: All Organisation related, only for 'admin' accounts
   - name: Authentication
+    description: Authenticate so we can do other stuff
   - name: User
   - name: System
 servers:
@@ -19,7 +21,7 @@ paths:
       summary: Returns all organisations
       operationId: GetAllOrganisations
       security:
-        - BearerAuth: []
+        - BearerAuth: ["admin"]
       tags:
         - Organisation
       parameters:
@@ -60,19 +62,33 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrganisationsGetResponse"
+                $ref: "#/components/schemas/Organisations"
+              example:
+                organisations:
+                  - id: 81i1h
+                    name: mycompany
+                    description: This is an amazing company
+                    enabled: true
+                    created_at: "2024-10-23 13:01:10"
+                    updated_at: "2024-10-23 13:01:11"
+                    fqdn: www.myhost.com
+                    admins: [
+                      "username1",
+                      "username2"
+                    ]
         default:
           description: unexpected error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /v1/organisation:
     post:
       summary: Create an organisation
       description: Create an organisation
       operationId: createOrganisation
       security:
-        - BearerAuth: []
+        - BearerAuth: ["admin"]
       tags:
         - Organisation
       requestBody:
@@ -80,7 +96,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OrganisationPostRequest"
+              $ref: "#/components/schemas/OrganisationIn"
         required: true
       responses:
         "201":
@@ -88,7 +104,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrganisationPostResponse"
+                $ref: "#/components/schemas/Organisation"
         default:
           description: When create fails
           content:
@@ -106,7 +122,9 @@ paths:
         description: Authenticate
         content:
           application/json:
-            example: { "username": "My Name", "password": "verySecret!"}
+            example:
+              username: myUsername
+              password: verySecret!
             schema:
               $ref: "#/components/schemas/AuthenticatePostRequest"
         required: true
@@ -116,9 +134,7 @@ paths:
           content:
             application/json:
               example:
-                {
-                  "token": "my.jwt.example"
-                }
+                token: my.jwt.example
               schema:
                 $ref: "#/components/schemas/AuthenticatePostResponse"
         "403":
@@ -126,34 +142,10 @@ paths:
           content:
             application/json:
               example:
-                {
-                  "message": "Invalid username/password combination"
-                }
+                message: Invalid username/password combination
               schema:
-                $ref: "#/components/schemas/AuthenticatePostResponseError"
+                $ref: "#/components/schemas/Error"
   /v1/user:
-    get:
-      summary: Get all users
-      description: Get all users
-      operationId: GetMetrics2
-      security:
-        - BearerAuth: ["admin", "write", "readonly"]
-      tags:
-        - User
-      responses:
-        "200":
-          description: Successfully created user
-        "404":
-          description: Users not exist
-          content:
-            application/json:
-              example:
-                {
-                  "error": "duplicate account"
-                }
-              schema:
-                type: string
-                example: duplicate account
     post:
       summary: Create User Account
       description: Create a User account
@@ -167,28 +159,87 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserPostRequest"
+              $ref: "#/components/schemas/UserIn"
         required: true
       responses:
         "201":
           description: Successfully created user
-          headers:
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserPostResponse"
-        "409":
-          description: User already exist
-          headers:
           content:
             application/json:
               example:
-                {
-                  "error": "duplicate account"
-                }
+                org_id: 11jasygubh
+                id: 871279gu1b2
+                username: myusername
+                enabled: true
+                created_at: "2024-10-23 13:01:10"
+                updated_at: "2024-10-23 13:01:11"
+                role: admin
+              schema:
+                properties:
+                  org_id:
+                    type: string
+                    example: oid
+                  id:
+                    type: string
+                    example: 871279gu1b2
+                  username:
+                    type: string
+                    example: username1
+                  enabled:
+                    type: boolean
+                    example: true
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: 2024-10-23 13:01:10
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: 2024-10-23 13:01:11
+                  role:
+                    type: string
+                    example: admin
+        "409":
+          description: User already exist
+          content:
+            application/json:
+              example:
+                error: duplicate account
               schema:
                 type: string
                 example: duplicate account
+  /v1/user/{user}:
+    get:
+      summary: Get all users
+      description: Get all users but is a dummy for now
+      operationId: getUserByID
+      parameters:
+        - in: path
+          name: user
+          schema:
+            type: string
+          required: true
+          description: User ID
+      security:
+        - BearerAuth: ["admin", "write", "readonly"]
+      tags:
+        - User
+      responses:
+        "200":
+          description: Get the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNoPassword"
+        "404":
+          description: User not exist
+          content:
+            application/json:
+              example:
+                error: user does not exist
+              schema:
+                type: string
+                example: user does not exist
   /v1/health:
     get:
       summary: Health
@@ -222,9 +273,9 @@ components:
       flows:
         authorizationCode:
           scopes:
-            admin: Grants read access
-            write: Grants write access
-            readonly: Grants access to admin operations
+            admin: Admin access all organisations
+            write: Be able to create or update resources in a organisation
+            readonly: Read-only requests in a organisation
   schemas:
     AuthenticatePostRequest:
       type: object
@@ -236,9 +287,16 @@ components:
         username:
           type: string
           example: username1
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=64,regexp=^[a-zA-Z]$
         password:
           type: string
           example: password
+          format: password
+          minLength: 6
+          maxLength: 256
+          x-oapi-codegen-extra-tags:
+            validate: required
     AuthenticatePostResponse:
       type: object
       description: Authenticate
@@ -248,25 +306,28 @@ components:
         token:
           type: string
           example: my.authenticated.token
-    AuthenticatePostResponseError:
+          x-oapi-codegen-extra-tags:
+            validate: required
+    OrganisationIn:
       type: object
-      description: Authenticate Error
+      description: Creating the Organisation object
       required:
-        - message
-      properties:
-        message:
-          type: string
-          example: Invalid username/password combination
-    OrganisationPostRequest:
-      type: object
-      description: Response of creating an organisation
+        - name
+        - description
+        - enabled
+        - fqdn
+        - admins
       properties:
         name:
           type: string
           example: Name of the company
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=64,regexp=^[a-zA-Z]$
         description:
           type: string
           example: Description of the company
+          x-oapi-codegen-extra-tags:
+            validate: required,min=1,max=256
         enabled:
           type: boolean
           example: true
@@ -274,71 +335,76 @@ components:
         fqdn:
           type: string
           example: FQDN of the environment
+          x-oapi-codegen-extra-tags:
+            validate: required,fqdn
         admins:
           type: array
+          items:
+            type: string
           example: ["username1", "username2"]
-    OrganisationPostResponse:
+    Organisation:
       type: object
-      description: Response of creating an organisation
+      description: Return of the Organisation object
+      required:
+        - id
+        - name
+        - description
+        - enabled
+        - created_at
+        - updated_at
+        - fqdn
+        - admins
       properties:
+        id:
+          type: string
+          example: id of the organisation
+          x-oapi-codegen-extra-tags:
+            validate: required,mongodb
         name:
           type: string
           example: Name of the company
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=64,regexp=^[a-zA-Z]$
         description:
           type: string
           example: Description of the company
+          x-oapi-codegen-extra-tags:
+            validate: required,min=1,max=256
         enabled:
           type: boolean
           example: true
           default: false
         created_at:
           type: string
+          format: date-time
           example: 2024-10-23 13:01:10
         updated_at:
           type: string
+          format: date-time
           example: 2024-10-23 13:01:11
         fqdn:
           type: string
           example: FQDN of the environment
         admins:
           type: array
+          items:
+            type: string
           example: ["username1", "username2"]
-    OrganisationsGetResponse:
+    Organisations:
       type: array
       maxItems: 100
       description: Overview of all organisations
       items:
-        $ref: "#/components/schemas/OrganisationGetRespone"
-    OrganisationGetRespone:
-      description: Get an Organisation
-      properties:
-        id:
-          type: string
-          example: username1
-        name:
-          type: string
-          example: password
-        description:
-          type: string
-          example: password
-        enabled:
-          type: boolean
-          example: false
-        fqdn:
-          type: string
-          example: www.my.com/panys
-        admins:
-          type: array
-          example: ["username1", "username2"]
-    UserPostRequest:
+        $ref: "#/components/schemas/Organisation"
+    UserIn:
       type: object
-      description: Creating a user
+      description: Object to create the User
       required:
-        - organisation_id
+        - org_id
         - username
         - password
       properties:
-        organisation_id:
+        org_id:
           type: string
           example: oid
         username:
@@ -354,11 +420,61 @@ components:
         role:
           type: string
           example: admin
-          default: ""
-    UserPostResponse:
+          default: "readonly"
+    User:
       type: object
-      description: Response object user creation
+      description: Return of the User object
+      required:
+        - org_id
+        - id
+        - username
+        - password
+        - enabled
+        - created_at
+        - updated_at
+        - role
       properties:
+        org_id:
+          type: string
+          example: oid
+        id:
+          type: string
+          example: 871279gu1b2
+        username:
+          type: string
+          example: username1
+        password:
+          type: string
+          example: password
+        enabled:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-10-23 13:01:10
+        updated_at:
+          type: string
+          format: date-time
+          example: 2024-10-23 13:01:11
+        role:
+          type: string
+          example: admin
+    UserNoPassword:
+      type: object
+      description: Return of the User object
+      required:
+        - org_id
+        - id
+        - username
+        - enabled
+        - created_at
+        - updated_at
+        - role
+      properties:
+        org_id:
+          type: string
+          example: oid
         id:
           type: string
           example: 871279gu1b2
@@ -370,9 +486,11 @@ components:
           example: true
         created_at:
           type: string
+          format: date-time
           example: 2024-10-23 13:01:10
         updated_at:
           type: string
+          format: date-time
           example: 2024-10-23 13:01:11
         role:
           type: string
@@ -383,13 +501,11 @@ components:
       type: string
     Error:
       type: object
-      description: Error response
+      description: Default error response
       required:
         - message
       example:
-        {
-          "message": "An error occurred"
-        }
+        message: An error occurred
       properties:
         message:
           type: string

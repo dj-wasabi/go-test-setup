@@ -32,3 +32,4 @@ test:
 openapi:
 	go generate internal/adapter/in/http/api/server-generator.go
 	go generate internal/core/domain/model/model-generator.go
+	go generate internal/core/port/in/in-generator.go

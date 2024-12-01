@@ -2,10 +2,6 @@ package model
 
 import "github.com/go-playground/validator/v10"
 
-// type AuthenticationToken struct {
-// 	Token string `json:"token" validate:"required"`
-// }
-
 type Authentication interface {
 	GetUsername() string
 	GetPassword() string

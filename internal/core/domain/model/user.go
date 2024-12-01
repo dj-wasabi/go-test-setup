@@ -7,18 +7,9 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type User struct {
-	Id        string
-	Username  string
-	Password  string
-	Enabled   bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Role      string
-}
-
 type IUser interface {
 	GetId() string
+	GetOrgId() string
 	GetUsername() string
 	GetPassword() string
 	GetEnabled() bool
@@ -27,6 +18,10 @@ type IUser interface {
 
 func (o *User) GetId() string {
 	return o.Id
+}
+
+func (o *User) GetOrgId() string {
+	return o.OrgId
 }
 
 func (o *User) GetUsername() string {
@@ -45,7 +40,7 @@ func (o *User) GetRole() string {
 	return o.Role
 }
 
-func NewUser(username, password, role string, enabled bool) (*User, error) {
+func NewUser(username, password, role string, enabled bool, orgid string) (*User, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	e := &User{
@@ -55,6 +50,7 @@ func NewUser(username, password, role string, enabled bool) (*User, error) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Role:      role,
+		OrgId:     orgid,
 	}
 	err := validate.Struct(e)
 	if err != nil {

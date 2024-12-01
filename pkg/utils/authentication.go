@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -74,7 +75,6 @@ func HashPassword(password *string) (string, error) {
 }
 
 func ValidateToken(l *slog.Logger, signedToken string) (claims *AuthenticationDetails, msg error) {
-	l.Info("Validating the provided token.")
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&AuthenticationDetails{},
@@ -87,6 +87,7 @@ func ValidateToken(l *slog.Logger, signedToken string) (claims *AuthenticationDe
 	}
 
 	claims, ok := token.Claims.(*AuthenticationDetails)
+	l.Debug(fmt.Sprintf("Validating the provided token for user '%v'.", claims.Username))
 	if !ok {
 		return nil, ErrInvalidToken
 	}

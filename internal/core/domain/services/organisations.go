@@ -8,14 +8,14 @@ import (
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
-func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.Organization) (*model.Organization, *model.Error) {
+func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.Organisation) (*model.Organisation, *model.Error) {
 	org := out.NewOrganization(command.Name, command.Description, command.Fqdn, command.Enabled, command.Admins)
 	org, err := c.org.CreateOrganisation(context.Background(), org)
 	if err != nil {
 		return nil, err
 	}
 
-	newOrg := &model.Organization{
+	newOrg := &model.Organisation{
 		Name:        org.Name,
 		Description: org.Description,
 		UpdatedAt:   org.UpdatedAt,
@@ -37,8 +37,8 @@ func (c *domainServices) GetAllOrganisations(ctx context.Context) (*model.ListOr
 
 	AllOrganisations := &model.ListOrganisations{}
 	for _, x := range allOrgs {
-		result := new(model.Organization)
-		result.ID = x.Id.Hex()
+		result := new(model.Organisation)
+		result.Id = x.Id.Hex()
 		result.Name = x.Name
 		result.Description = x.Description
 		result.Admins = x.Admins

@@ -9,7 +9,7 @@ import (
 )
 
 type UserPort struct {
-	ID        primitive.ObjectID `bson:"_id"`
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
 	Username  string             `bson:"username"`
 	Password  string             `bson:"password"`
 	Enabled   bool               `bson:"enabled"`
@@ -17,10 +17,12 @@ type UserPort struct {
 	UpdatedAt time.Time          `bson:"updated_at"`
 	Role      string             `bson:"role"`
 	Token     string             `bson:"token"`
+	OrgId     string             `bson:"organisation_id"`
 }
 
 type IUser interface {
 	GetId() primitive.ObjectID
+	GetOrgId() string
 	GetUsername() string
 	GetPassword() string
 	GetEnabled() bool
@@ -32,6 +34,10 @@ type IUser interface {
 
 func (o *UserPort) GetId() primitive.ObjectID {
 	return o.ID
+}
+
+func (o *UserPort) GetOrgId() string {
+	return o.OrgId
 }
 
 func (o *UserPort) GetUsername() string {
@@ -62,7 +68,7 @@ func (o *UserPort) GetToken() string {
 	return o.Token
 }
 
-func NewUser(username, password, role string, enabled bool) *UserPort {
+func NewUser(username, password, role string, enabled bool, orgid string) *UserPort {
 	return &UserPort{
 		Username:  username,
 		Password:  password,
@@ -70,6 +76,7 @@ func NewUser(username, password, role string, enabled bool) *UserPort {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Role:      role,
+		OrgId:     orgid,
 	}
 }
 
