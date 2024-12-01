@@ -14,7 +14,7 @@ const (
 // AuthenticatePostRequest Authenticate
 type AuthenticatePostRequest struct {
 	Password string `json:"password" validate:"required"`
-	Username string `json:"username" validate:"required,min=6,max=64,regexp=^[a-zA-Z]$"`
+	Username string `json:"username" validate:"required,min=6,max=64"`
 }
 
 // AuthenticatePostResponse Authenticate
@@ -38,7 +38,7 @@ type Organisation struct {
 	Enabled     bool      `json:"enabled"`
 	Fqdn        string    `json:"fqdn"`
 	Id          string    `json:"id" validate:"required,mongodb"`
-	Name        string    `json:"name" validate:"required,min=6,max=64,regexp=^[a-zA-Z]$"`
+	Name        string    `json:"name" validate:"required,min=6,max=64"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
@@ -48,7 +48,7 @@ type OrganisationIn struct {
 	Description string   `json:"description" validate:"required,min=1,max=256"`
 	Enabled     bool     `json:"enabled"`
 	Fqdn        string   `json:"fqdn" validate:"required,fqdn"`
-	Name        string   `json:"name" validate:"required,min=6,max=64,regexp=^[a-zA-Z]$"`
+	Name        string   `json:"name" validate:"required,min=6,max=64"`
 }
 
 // Organisations Overview of all organisations

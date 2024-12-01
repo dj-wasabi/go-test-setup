@@ -288,7 +288,7 @@ components:
           type: string
           example: username1
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=64,regexp=^[a-zA-Z]$
+            validate: required,min=6,max=64
         password:
           type: string
           example: password
@@ -322,7 +322,7 @@ components:
           type: string
           example: Name of the company
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=64,regexp=^[a-zA-Z]$
+            validate: required,min=6,max=64
         description:
           type: string
           example: Description of the company
@@ -364,7 +364,7 @@ components:
           type: string
           example: Name of the company
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=64,regexp=^[a-zA-Z]$
+            validate: required,min=6,max=64
         description:
           type: string
           example: Description of the company
