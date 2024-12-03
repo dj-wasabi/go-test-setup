@@ -288,15 +288,13 @@ components:
           type: string
           example: username1
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=64
+            validate: required,min=6,max=64,alphanum
         password:
           type: string
           example: password
           format: password
-          minLength: 6
-          maxLength: 256
           x-oapi-codegen-extra-tags:
-            validate: required
+            validate: required,min=6,max=256
     AuthenticatePostResponse:
       type: object
       description: Authenticate
@@ -322,7 +320,7 @@ components:
           type: string
           example: Name of the company
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=64
+            validate: required,min=6,max=64,alphanum
         description:
           type: string
           example: Description of the company
@@ -359,12 +357,12 @@ components:
           type: string
           example: id of the organisation
           x-oapi-codegen-extra-tags:
-            validate: required,mongodb
+            validate: required
         name:
           type: string
           example: Name of the company
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=64
+            validate: required,min=6,max=64,alphanum
         description:
           type: string
           example: Description of the company
@@ -403,24 +401,34 @@ components:
         - org_id
         - username
         - password
+        - enabled
+        - role
       properties:
         org_id:
           type: string
           example: oid
+          x-oapi-codegen-extra-tags:
+            validate: required
         username:
           type: string
           example: username1
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=64,alphanum
         password:
           type: string
           example: password
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=256
         enabled:
           type: boolean
           example: true
           default: false
+          x-omitempty: true
         role:
           type: string
           example: admin
           default: "readonly"
+          x-omitempty: true
     User:
       type: object
       description: Return of the User object
@@ -443,12 +451,17 @@ components:
         username:
           type: string
           example: username1
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=64,alphanum
         password:
           type: string
           example: password
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=256
         enabled:
           type: boolean
           example: true
+          default: false
         created_at:
           type: string
           format: date-time
@@ -475,15 +488,22 @@ components:
         org_id:
           type: string
           example: oid
+          x-oapi-codegen-extra-tags:
+            validate: required
         id:
           type: string
           example: 871279gu1b2
+          x-oapi-codegen-extra-tags:
+            validate: required
         username:
           type: string
           example: username1
+          x-oapi-codegen-extra-tags:
+            validate: required,min=6,max=64,alphanum
         enabled:
           type: boolean
           example: true
+          default: false
         created_at:
           type: string
           format: date-time

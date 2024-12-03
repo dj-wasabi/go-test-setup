@@ -18,10 +18,18 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	input, _ := model.NewUser(u.GetUsername(), u.GetPassword(), u.GetRole(), u.GetEnabled(), u.GetOrgId())
+	input, myerr := model.NewUser(u.GetUsername(), u.GetPassword(), u.GetRole(), u.GetEnabled(), u.GetOrgId())
+	if myerr != nil {
+		error := &model.Error{
+			Message: myerr.Error(),
+		}
+		c.AbortWithStatusJSON(http.StatusBadRequest, error)
+		return
+	}
 	message, err := cs.uc.UserCreate(context.Background(), input)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusConflict, err)
+		return
 	} else {
 		output := envelope{"id": message}
 		c.JSON(http.StatusOK, output)

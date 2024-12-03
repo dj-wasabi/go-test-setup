@@ -7,7 +7,7 @@ import (
 )
 
 func Test_new_user(t *testing.T) {
-	username := "test_user"
+	username := "testuser"
 	password := "secure_password"
 	enabled := true
 	role := "admin"
@@ -31,21 +31,54 @@ func Test_new_user_without_username(t *testing.T) {
 	orgid := "orgid123456"
 
 	_, err := NewUser("", password, role, enabled, orgid)
-	assert.Nil(t, err, "Username is not provided")
+	assert.Equal(t, err.Error(), "The field 'username' is required.")
+}
+
+func Test_new_user_without_username_incorrect(t *testing.T) {
+	username := "test_user"
+	password := "securepassword"
+	enabled := true
+	role := "admin"
+	orgid := "orgid123456"
+
+	_, err := NewUser(username, password, role, enabled, orgid)
+	assert.Equal(t, err.Error(), "Only alphabetical and numerical characters are allowed.")
 }
 
 func Test_new_user_without_password(t *testing.T) {
-	username := "test_user"
+	username := "testuser"
 	enabled := true
 	role := "admin"
 	orgid := "orgid123456"
 
 	_, err := NewUser(username, "", role, enabled, orgid)
-	assert.Nil(t, err, "Password is not provided")
+	assert.Equal(t, err.Error(), "The field 'password' is required.")
+}
+
+func Test_new_user_not_minimum_characters(t *testing.T) {
+	username := "test"
+	password := "securepassword"
+	enabled := true
+	role := "admin"
+	orgid := "orgid123456"
+
+	_, err := NewUser(username, password, role, enabled, orgid)
+	assert.Equal(t, err.Error(), "The 'username' field needs a minimum amount of 6 characters.")
+}
+
+func Test_new_user_more_than_maximum_characters(t *testing.T) {
+	username := "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest"
+	password := "securepassword"
+	enabled := true
+	role := "admin"
+	orgid := "orgid123456"
+
+	_, err := NewUser(username, password, role, enabled, orgid)
+	assert.Equal(t, err.Error(), "The 'username' field has a maximum amount of 64 characters.")
 }
 
 func Test_new_user_funcs(t *testing.T) {
-	username := "test_user"
+	username := "testuser"
 	password := "secure_password"
 	enabled := true
 	role := "admin"

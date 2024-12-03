@@ -22,19 +22,19 @@ func (o *UserIn) GetPassword() string {
 }
 
 func (o *UserIn) GetEnabled() bool {
-	return *o.Enabled
+	return o.Enabled
 }
 
 func (o *UserIn) GetRole() string {
-	return *o.Role
+	return o.Role
 }
 
 func NewUserIn(username, password, role string, enabled bool, orgid string) *UserIn {
 	return &UserIn{
 		Username: username,
 		Password: password,
-		Enabled:  &enabled,
-		Role:     &role,
+		Enabled:  enabled,
+		Role:     role,
 		OrgId:    orgid,
 	}
 }
