@@ -37,7 +37,7 @@ type Organisation struct {
 	Description string    `json:"description" validate:"required,min=1,max=256"`
 	Enabled     bool      `json:"enabled"`
 	Fqdn        string    `json:"fqdn"`
-	Id          string    `json:"id" validate:"required"`
+	Id          string    `json:"id,omitempty"`
 	Name        string    `json:"name" validate:"required,min=6,max=64,alphanum"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -58,8 +58,8 @@ type Organisations = []Organisation
 type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	Enabled   bool      `json:"enabled"`
-	Id        string    `json:"id"`
-	OrgId     string    `json:"org_id"`
+	Id        string    `json:"id,omitempty"`
+	OrgId     string    `json:"org_id" validate:"required"`
 	Password  string    `json:"password" validate:"required,min=6,max=256"`
 	Role      string    `json:"role"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -68,7 +68,7 @@ type User struct {
 
 // UserIn Object to create the User
 type UserIn struct {
-	Enabled  bool   `json:"enabled,omitempty"`
+	Enabled  bool   `json:"enabled"`
 	OrgId    string `json:"org_id" validate:"required"`
 	Password string `json:"password" validate:"required,min=6,max=256"`
 	Role     string `json:"role,omitempty"`

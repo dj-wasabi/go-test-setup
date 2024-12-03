@@ -11,7 +11,9 @@ tags:
   - name: Authentication
     description: Authenticate so we can do other stuff
   - name: User
+    description: All user related actions, create, delete and edit
   - name: System
+    description: Overall / System related endpoints for like monitoring
 servers:
   - url: "http://localhost/v1"
 paths:
@@ -76,6 +78,14 @@ paths:
                       "username1",
                       "username2"
                     ]
+        "403":
+          description: Authentication token is required, otherwise denied access
+          content:
+            application/json:
+              example:
+                message: Authenticated token is required.
+              schema:
+                $ref: "#/components/schemas/Error"
         default:
           description: unexpected error
           content:
@@ -111,6 +121,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "403":
+          description: Authentication token is required, otherwise denied access
+          content:
+            application/json:
+              example:
+                message: Authenticated token is required.
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Organisation already exist
+          content:
+            application/json:
+              example:
+                error: duplicate organisation
+              schema:
+                type: string
+                example: duplicate organisation
   /v1/auth/login:
     post:
       summary: Authenticate
@@ -199,6 +226,14 @@ paths:
                   role:
                     type: string
                     example: admin
+        "403":
+          description: Authentication token is required, otherwise denied access
+          content:
+            application/json:
+              example:
+                message: Authenticated token is required.
+              schema:
+                $ref: "#/components/schemas/Error"
         "409":
           description: User already exist
           content:
@@ -231,6 +266,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNoPassword"
+        "403":
+          description: Authentication token is required, otherwise denied access
+          content:
+            application/json:
+              example:
+                message: Authenticated token is required.
+              schema:
+                $ref: "#/components/schemas/Error"
         "404":
           description: User not exist
           content:
@@ -254,6 +297,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MetricsGetResponse"
+        "503":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/Error"
   /v1/metrics:
     get:
       summary: Metrics
@@ -356,8 +407,7 @@ components:
         id:
           type: string
           example: id of the organisation
-          x-oapi-codegen-extra-tags:
-            validate: required
+          x-omitempty: true
         name:
           type: string
           example: Name of the company
@@ -423,7 +473,6 @@ components:
           type: boolean
           example: true
           default: false
-          x-omitempty: true
         role:
           type: string
           example: admin
@@ -445,9 +494,12 @@ components:
         org_id:
           type: string
           example: oid
+          x-oapi-codegen-extra-tags:
+            validate: required
         id:
           type: string
           example: 871279gu1b2
+          x-omitempty: true
         username:
           type: string
           example: username1
@@ -473,6 +525,7 @@ components:
         role:
           type: string
           example: admin
+          default: "readonly"
     UserNoPassword:
       type: object
       description: Return of the User object
