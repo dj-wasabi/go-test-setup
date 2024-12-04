@@ -17,8 +17,8 @@ type AuthenticatePostRequest struct {
 	Username string `json:"username" validate:"required,min=6,max=64,alphanum"`
 }
 
-// AuthenticatePostResponse Authenticate
-type AuthenticatePostResponse struct {
+// AuthenticateToken Authenticate
+type AuthenticateToken struct {
 	Token string `json:"token" validate:"required"`
 }
 

@@ -26,7 +26,8 @@ var (
 func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 	var e model.AuthenticatePostRequest
 	if err := c.ShouldBindJSON(&e); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		error := model.NewError(err.Error())
+		c.JSON(http.StatusBadRequest, error)
 		return
 	}
 
@@ -34,7 +35,8 @@ func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	errCheck := validate.Struct(e)
 	if errCheck != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errCheck.Error()})
+		error := model.NewError(errCheck.Error())
+		c.JSON(http.StatusBadRequest, error)
 		return
 	}
 

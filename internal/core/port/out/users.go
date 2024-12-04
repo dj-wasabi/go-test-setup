@@ -82,7 +82,7 @@ func NewUser(username, password, role string, enabled bool, orgid string) *UserP
 
 // TODO found in adapter/out/mongodb/{organisations,authenticate}.go
 type PortUser interface {
-	Create(ctx context.Context, user *UserPort) (string, *model.Error)
-	GetByName(username string, ctx context.Context) (*UserPort, error)
+	Create(ctx context.Context, user *UserPort) (*UserPort, *model.Error)
+	GetByName(username string, ctx context.Context) (*UserPort, *model.Error)
 	UpdateToken(ctx context.Context, token, username string) bool
 }

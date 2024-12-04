@@ -6,24 +6,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
-	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 )
 
 // cs.uc --> domain/services/organisation
 
 func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 	cs.log.Debug("Ceate an organisation")
-	var e in.OrganisationIn
+	var e model.Organisation
 	if err := c.ShouldBindJSON(&e); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	result, err := cs.uc.CreateOrganisation(context.Background(), model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins()))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+	organisationObject, organisationError := model.NewOrganization(e.GetName(), e.GetDescription(), e.GetFqdn(), e.GetEnabled(), e.GetAdmins())
+	if organisationError != nil {
+		error := model.NewError(organisationError.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, error)
 		return
 	}
-	c.JSON(http.StatusOK, result)
+
+	createOutput, createError := cs.uc.CreateOrganisation(context.Background(), organisationObject)
+	if createError != nil {
+		c.JSON(http.StatusInternalServerError, createError)
+		return
+	}
+	c.JSON(http.StatusOK, createOutput)
 }
 
 func (cs *ApiHandler) GetAllOrganisations(c *gin.Context, params GetAllOrganisationsParams) {

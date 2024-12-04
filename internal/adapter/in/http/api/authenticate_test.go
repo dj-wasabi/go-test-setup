@@ -33,7 +33,7 @@ var (
 	repoUser            *mongodb.MongodbRepository
 	serviceUser         out.PortUser
 	serviceOrganisation out.PortOrganisation
-	authToken           *model.AuthenticatePostResponse
+	authToken           *model.AuthenticateToken
 	authRequest         model.AuthenticatePostRequest
 	authError           model.Error
 	myUser              out.UserPort

@@ -8,7 +8,7 @@ import (
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
-func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password string) (*model.AuthenticatePostResponse, *model.Error) {
+func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password string) (*model.AuthenticateToken, *model.Error) {
 	user, err := c.usr.GetByName(username, ctx)
 	c.log.Debug(fmt.Sprintf("We have the '%v' username", username))
 	if err != nil {
@@ -20,13 +20,10 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 		return nil, model.GetError("USR0002")
 	}
 
-	token, err := utils.GenerateToken(username, user.Role)
+	token, authenticateError := utils.GenerateToken(username, user.Role)
 	c.log.Debug(fmt.Sprintf("Generated a new token for the user with '%v' as username", username))
-	if err != nil {
-		myError := &model.Error{
-			Message: err.Error(),
-		}
-		return nil, myError
+	if authenticateError != nil {
+		return nil, model.NewError(authenticateError.Error())
 	}
 	// TMP Disable to continue investigating on how
 	// to make the tests work with the checking part.
@@ -34,10 +31,10 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 	// if !isUpdated {
 	// 	return nil, model.GetError("AUTH002")
 	// }
-
-	tokens := &model.AuthenticatePostResponse{
-		Token: token,
+	tokenOutput, tokenError := model.NewAuthenticationToken(token)
+	if tokenError != nil {
+		return nil, model.NewError(tokenError.Error())
 	}
 
-	return tokens, nil
+	return tokenOutput, nil
 }

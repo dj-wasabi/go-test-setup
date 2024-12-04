@@ -15,16 +15,16 @@ func (a *AuthenticatePostRequest) GetPassword() string {
 	return a.Password
 }
 
-func NewAuthenticationToken(token string) (*AuthenticatePostResponse, error) {
+func NewAuthenticationToken(token string) (*AuthenticateToken, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	t := &AuthenticatePostResponse{
+	t := &AuthenticateToken{
 		Token: token,
 	}
 
 	err := validate.Struct(t)
 	if err != nil {
-		return &AuthenticatePostResponse{}, err
+		return &AuthenticateToken{}, err
 	}
 	return t, nil
 }

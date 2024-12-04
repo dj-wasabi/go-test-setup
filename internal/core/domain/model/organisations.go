@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -9,6 +10,16 @@ import (
 
 type ListOrganisations struct {
 	Organisations []Organisation `json:"organisations"`
+}
+
+var customOrganisationErrorMessages = map[string]string{
+	"Username.required": "The field 'username' is required.",
+	"Username.alphanum": "Only alphabetical and numerical characters are allowed.",
+	"Username.min":      "The 'username' field needs a minimum amount of 6 characters.",
+	"Username.max":      "The 'username' field has a maximum amount of 64 characters.",
+	"Password.required": "The field 'password' is required.",
+	"Password.min":      "The 'password' field needs a minimum amount of 6 characters.",
+	"Password.max":      "The 'password' field has a maximum amount of 64 characters.",
 }
 
 type IOrganisation interface {
@@ -44,7 +55,7 @@ func (o *Organisation) GetAdmins() []string {
 	return o.Admins
 }
 
-func NewOrganization(name, description, fqdn string, enabled bool, admins []string) *Organisation {
+func NewOrganization(name, description, fqdn string, enabled bool, admins []string) (*Organisation, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	e := &Organisation{
@@ -58,8 +69,16 @@ func NewOrganization(name, description, fqdn string, enabled bool, admins []stri
 	}
 	err := validate.Struct(e)
 	if err != nil {
-		fmt.Println(err.Error())
-		return &Organisation{}
+		validationErrors := err.(validator.ValidationErrors)
+		for _, fieldError := range validationErrors {
+			field := fieldError.StructField()
+			tag := fieldError.Tag()
+			errorKey := fmt.Sprintf("%s.%s", field, tag)
+
+			if message, keyFound := customOrganisationErrorMessages[errorKey]; keyFound {
+				return &Organisation{}, errors.New(message)
+			}
+		}
 	}
-	return e
+	return e, err
 }

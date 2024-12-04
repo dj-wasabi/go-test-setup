@@ -6,33 +6,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
-	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 )
 
 // cs.uc --> domain/services/organisation
 
 func (cs *ApiHandler) UserCreate(c *gin.Context) {
-	cs.log.Debug("Ceate an organisation")
-	var u in.UserIn
+	cs.log.Debug("Ceate a user")
+	var u model.User
 	if err := c.ShouldBindJSON(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		error := model.NewError(err.Error())
+		c.JSON(http.StatusBadRequest, error)
 		return
 	}
-	input, myerr := model.NewUser(u.GetUsername(), u.GetPassword(), u.GetRole(), u.GetEnabled(), u.GetOrgId())
-	if myerr != nil {
-		error := &model.Error{
-			Message: myerr.Error(),
-		}
+	userObject, userError := model.NewUser(u.GetUsername(), u.GetPassword(), u.GetRole(), u.GetEnabled(), u.GetOrgId())
+	if userError != nil {
+		error := model.NewError(userError.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, error)
 		return
 	}
-	message, err := cs.uc.UserCreate(context.Background(), input)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusConflict, err)
+	createMessage, createError := cs.uc.UserCreate(context.Background(), userObject)
+	if createError != nil {
+		c.AbortWithStatusJSON(http.StatusConflict, createError)
 		return
 	} else {
-		output := envelope{"id": message}
-		c.JSON(http.StatusOK, output)
+		c.JSON(http.StatusOK, createMessage)
 	}
 }
 

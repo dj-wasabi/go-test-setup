@@ -20,3 +20,9 @@ func GetError(error string) *Error {
 	}
 	return message
 }
+
+func NewError(error string) *Error {
+	return &Error{
+		Message: error,
+	}
+}

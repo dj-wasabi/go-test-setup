@@ -163,7 +163,7 @@ paths:
               example:
                 token: my.jwt.example
               schema:
-                $ref: "#/components/schemas/AuthenticatePostResponse"
+                $ref: "#/components/schemas/AuthenticateToken"
         "403":
           description: Unsuccesfull authentication attempt
           content:
@@ -346,7 +346,7 @@ components:
           format: password
           x-oapi-codegen-extra-tags:
             validate: required,min=6,max=256
-    AuthenticatePostResponse:
+    AuthenticateToken:
       type: object
       description: Authenticate
       required:
