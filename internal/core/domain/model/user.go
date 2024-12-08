@@ -3,19 +3,22 @@ package model
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
 var customUserErrorMessages = map[string]string{
-	"Username.required": "The field 'username' is required.",
-	"Username.alphanum": "Only alphabetical and numerical characters are allowed.",
-	"Username.min":      "The 'username' field needs a minimum amount of 6 characters.",
-	"Username.max":      "The 'username' field has a maximum amount of 64 characters.",
-	"Password.required": "The field 'password' is required.",
-	"Password.min":      "The 'password' field needs a minimum amount of 6 characters.",
-	"Password.max":      "The 'password' field has a maximum amount of 64 characters.",
+	"Username.required":         "The field 'username' is required.",
+	"Username.alphanum":         "Only alphabetical and numerical characters are allowed.",
+	"Username.min":              "The 'username' field needs a minimum amount of 6 characters.",
+	"Username.max":              "The 'username' field has a maximum amount of 64 characters.",
+	"Password.required":         "The field 'password' is required.",
+	"Password.min":              "The 'password' field needs a minimum amount of 6 characters.",
+	"Password.max":              "The 'password' field has a maximum amount of 64 characters.",
+	"Password.validatePassword": "The password needs to have at least 1 uppercase, lowercase, number and any of the following characters: !\"#$%&'()*+,\\-./:;<=>?@[\\\\]^_`{|}~]",
+	"Role.oneof":                "Only 'admin', 'write' or 'readonly' are allowed.",
 }
 
 type IUser interface {
@@ -51,8 +54,34 @@ func (o *User) GetRole() string {
 	return o.Role
 }
 
+// Custom check to validate the provided password. Could not find an easy way to rely
+// on the OpenAPI/Struct Validator and making our own validator would be the best way.
+func validatePassword(fl validator.FieldLevel) bool {
+	password := fl.Field().String()
+
+	var hasLower = regexp.MustCompile(`[[:lower:]]`)
+	var hasUpper = regexp.MustCompile(`[[:upper:]]`)
+	var hasNumber = regexp.MustCompile(`[[:digit:]]`)
+	var hasCharacters = regexp.MustCompile(`[[:graph:]]`)
+
+	if !hasLower.MatchString(password) {
+		return false
+	}
+	if !hasUpper.MatchString(password) {
+		return false
+	}
+	if !hasNumber.MatchString(password) {
+		return false
+	}
+	if !hasCharacters.MatchString(password) {
+		return false
+	}
+	return true
+}
+
 func NewUser(username, password, role string, enabled bool, orgid string) (*User, error) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	validate.RegisterValidation("validatePassword", validatePassword)
 
 	e := &User{
 		Username:  username,

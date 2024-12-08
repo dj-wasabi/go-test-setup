@@ -60,8 +60,8 @@ type User struct {
 	Enabled   bool      `json:"enabled"`
 	Id        string    `json:"id,omitempty"`
 	OrgId     string    `json:"org_id" validate:"required"`
-	Password  string    `json:"password" validate:"required,min=6,max=256"`
-	Role      string    `json:"role"`
+	Password  string    `json:"password" validate:"required,min=6,max=256,validatePassword"`
+	Role      string    `json:"role" validate:"oneof=admin write readonly"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Username  string    `json:"username" validate:"required,min=6,max=64,alphanum"`
 }
@@ -71,7 +71,7 @@ type UserIn struct {
 	Enabled  bool   `json:"enabled"`
 	OrgId    string `json:"org_id" validate:"required"`
 	Password string `json:"password" validate:"required,min=6,max=256"`
-	Role     string `json:"role,omitempty"`
+	Role     string `json:"role,omitempty" validate:"oneof=admin write readonly"`
 	Username string `json:"username" validate:"required,min=6,max=64,alphanum"`
 }
 
@@ -81,7 +81,7 @@ type UserNoPassword struct {
 	Enabled   bool      `json:"enabled"`
 	Id        string    `json:"id" validate:"required"`
 	OrgId     string    `json:"org_id" validate:"required"`
-	Role      string    `json:"role"`
+	Role      string    `json:"role" validate:"oneof=admin write readonly"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Username  string    `json:"username" validate:"required,min=6,max=64,alphanum"`
 }

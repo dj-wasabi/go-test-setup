@@ -478,6 +478,8 @@ components:
           example: admin
           default: "readonly"
           x-omitempty: true
+          x-oapi-codegen-extra-tags:
+            validate: oneof=admin write readonly
     User:
       type: object
       description: Return of the User object
@@ -509,7 +511,7 @@ components:
           type: string
           example: password
           x-oapi-codegen-extra-tags:
-            validate: required,min=6,max=256
+            validate: required,min=6,max=256,validatePassword
         enabled:
           type: boolean
           example: true
@@ -526,6 +528,8 @@ components:
           type: string
           example: admin
           default: "readonly"
+          x-oapi-codegen-extra-tags:
+            validate: oneof=admin write readonly
     UserNoPassword:
       type: object
       description: Return of the User object
@@ -568,6 +572,9 @@ components:
         role:
           type: string
           example: admin
+          default: "readonly"
+          x-oapi-codegen-extra-tags:
+            validate: oneof=admin write readonly
     MetricsGetResponse:
       description: Metrics for Prometheus response
       example: "Unknown"
