@@ -64,18 +64,10 @@ func validatePassword(fl validator.FieldLevel) bool {
 	var hasNumber = regexp.MustCompile(`[[:digit:]]`)
 	var hasCharacters = regexp.MustCompile(`[[:graph:]]`)
 
-	if !hasLower.MatchString(password) {
+	if !hasLower.MatchString(password) || !hasUpper.MatchString(password) || !hasNumber.MatchString(password) || !hasCharacters.MatchString(password) {
 		return false
 	}
-	if !hasUpper.MatchString(password) {
-		return false
-	}
-	if !hasNumber.MatchString(password) {
-		return false
-	}
-	if !hasCharacters.MatchString(password) {
-		return false
-	}
+
 	return true
 }
 

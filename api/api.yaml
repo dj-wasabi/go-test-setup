@@ -153,7 +153,7 @@ paths:
               username: myUsername
               password: verySecret!
             schema:
-              $ref: "#/components/schemas/AuthenticatePostRequest"
+              $ref: "#/components/schemas/AuthenticateRequest"
         required: true
       responses:
         "200":
@@ -328,7 +328,7 @@ components:
             write: Be able to create or update resources in a organisation
             readonly: Read-only requests in a organisation
   schemas:
-    AuthenticatePostRequest:
+    AuthenticateRequest:
       type: object
       description: Authenticate
       required:
@@ -359,7 +359,7 @@ components:
             validate: required
     OrganisationIn:
       type: object
-      description: Creating the Organisation object
+      description: Input to create the Organisation object
       required:
         - name
         - description
@@ -393,7 +393,7 @@ components:
           example: ["username1", "username2"]
     Organisation:
       type: object
-      description: Return of the Organisation object
+      description: The model Organisation object
       required:
         - id
         - name
@@ -446,7 +446,7 @@ components:
         $ref: "#/components/schemas/Organisation"
     UserIn:
       type: object
-      description: Object to create the User
+      description: Input to create the User object
       required:
         - org_id
         - username
@@ -482,7 +482,7 @@ components:
             validate: oneof=admin write readonly
     User:
       type: object
-      description: Return of the User object
+      description: The model User object
       required:
         - org_id
         - id

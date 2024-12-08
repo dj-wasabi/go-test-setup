@@ -11,8 +11,8 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
-// AuthenticatePostRequest Authenticate
-type AuthenticatePostRequest struct {
+// AuthenticateRequest Authenticate
+type AuthenticateRequest struct {
 	Password string `json:"password" validate:"required,min=6,max=256"`
 	Username string `json:"username" validate:"required,min=6,max=64,alphanum"`
 }
@@ -30,7 +30,7 @@ type Error struct {
 // MetricsGetResponse Metrics for Prometheus response
 type MetricsGetResponse = string
 
-// Organisation Return of the Organisation object
+// Organisation The model Organisation object
 type Organisation struct {
 	Admins      []string  `json:"admins"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -42,7 +42,7 @@ type Organisation struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// OrganisationIn Creating the Organisation object
+// OrganisationIn Input to create the Organisation object
 type OrganisationIn struct {
 	Admins      []string `json:"admins"`
 	Description string   `json:"description" validate:"required,min=1,max=256"`
@@ -54,7 +54,7 @@ type OrganisationIn struct {
 // Organisations Overview of all organisations
 type Organisations = []Organisation
 
-// User Return of the User object
+// User The model User object
 type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	Enabled   bool      `json:"enabled"`
@@ -66,7 +66,7 @@ type User struct {
 	Username  string    `json:"username" validate:"required,min=6,max=64,alphanum"`
 }
 
-// UserIn Object to create the User
+// UserIn Input to create the User object
 type UserIn struct {
 	Enabled  bool   `json:"enabled"`
 	OrgId    string `json:"org_id" validate:"required"`
@@ -96,7 +96,7 @@ type GetAllOrganisationsParams struct {
 }
 
 // AuthenticateLoginJSONRequestBody defines body for AuthenticateLogin for application/json ContentType.
-type AuthenticateLoginJSONRequestBody = AuthenticatePostRequest
+type AuthenticateLoginJSONRequestBody = AuthenticateRequest
 
 // CreateOrganisationJSONRequestBody defines body for CreateOrganisation for application/json ContentType.
 type CreateOrganisationJSONRequestBody = OrganisationIn

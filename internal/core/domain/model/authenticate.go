@@ -7,11 +7,11 @@ type Authentication interface {
 	GetPassword() string
 }
 
-func (a *AuthenticatePostRequest) GetUsername() string {
+func (a *AuthenticateRequest) GetUsername() string {
 	return a.Username
 }
 
-func (a *AuthenticatePostRequest) GetPassword() string {
+func (a *AuthenticateRequest) GetPassword() string {
 	return a.Password
 }
 
