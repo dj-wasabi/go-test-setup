@@ -42,7 +42,7 @@ var (
 
 func prepareTest(t *testing.T) {
 	mongoTest = mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	os.Setenv("LOGFILE_PATH", "../../../../../config.yaml")
+	os.Setenv("CONFIGURATION_FILE", "../../../../../config.yaml")
 }
 
 func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
@@ -131,6 +131,47 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, authError.Message, "Invalid username/password combination")
+	})
+
+	mongoTest.Run("authenticate_username_error", func(mt *mtest.T) {
+
+		prepareMongoDB(mt, logging.Initialize())
+		prepareGin()
+
+		authRequest = model.AuthenticateRequest{
+			Username: "small",
+			Password: "mysecretpassword",
+		}
+		b, _ := json.Marshal(authRequest)
+		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
+		req.Header.Set("Accept", "application/json")
+
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		err := json.NewDecoder(rec.Body).Decode(&authError)
+
+		assert.NoError(t, err)
+		assert.Equal(t, authError.Message, "The 'username' field needs a minimum amount of 6 characters.")
+	})
+
+	mongoTest.Run("authenticate_username_error", func(mt *mtest.T) {
+
+		prepareMongoDB(mt, logging.Initialize())
+		prepareGin()
+
+		authRequest = model.AuthenticateRequest{
+			Username: myUser.Username,
+		}
+		b, _ := json.Marshal(authRequest)
+		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
+		req.Header.Set("Accept", "application/json")
+
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		err := json.NewDecoder(rec.Body).Decode(&authError)
+
+		assert.NoError(t, err)
+		assert.Equal(t, authError.Message, "The field 'password' is required.")
 	})
 
 }

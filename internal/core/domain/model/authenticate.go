@@ -1,6 +1,12 @@
 package model
 
-import "github.com/go-playground/validator/v10"
+import (
+	"werner-dijkerman.nl/test-setup/pkg/validator"
+)
+
+var customAuthErrorMessages = map[string]string{
+	"Token.required": "The field 'username' is required.",
+}
 
 type Authentication interface {
 	GetUsername() string
@@ -15,16 +21,16 @@ func (a *AuthenticateRequest) GetPassword() string {
 	return a.Password
 }
 
-func NewAuthenticationToken(token string) (*AuthenticateToken, error) {
-	validate := validator.New(validator.WithRequiredStructEnabled())
+func ValidateAuthenticationData(at *AuthenticateRequest) error {
+	err := validator.CheckConfig(*at, customUserErrorMessages)
+	return err
+}
 
+func NewAuthenticationToken(token string) (*AuthenticateToken, error) {
 	t := &AuthenticateToken{
 		Token: token,
 	}
 
-	err := validate.Struct(t)
-	if err != nil {
-		return &AuthenticateToken{}, err
-	}
-	return t, nil
+	err := validator.CheckConfig(*t, customAuthErrorMessages)
+	return t, err
 }

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"werner-dijkerman.nl/test-setup/pkg/validator"
 )
 
 func Test_loadconfig_configfile(t *testing.T) {
@@ -32,21 +31,12 @@ func Test_loadconfig_override(t *testing.T) {
 	assert.Equal(t, config.Http.Timeout.Idle, 1)
 }
 
-func Test_validateConfig_be_true(t *testing.T) {
-	os.Setenv("HTTP_TIMEOUT_IDLE", "1")
+func Test_loadconfig_ignore_error(t *testing.T) {
+	os.Setenv("HTTP_TIMEOUT_IDLE", "pizza")
 
-	config, _ := loadConfig()
-	v := validator.New()
-	okConfig := validateConfig(v, config)
-	assert.True(t, okConfig)
-}
+	config, err := loadConfig()
+	assert.NoError(t, err)
+	assert.NotNil(t, config)
 
-func Test_validateConfig_incorrect_value(t *testing.T) {
-	os.Setenv("HTTP_TIMEOUT_IDLE", "0")
-	os.Setenv("HTTP_TIMEOUT_WRITE", "0")
-
-	config, _ := loadConfig()
-	v := validator.New()
-	okConfig := validateConfig(v, config)
-	assert.False(t, okConfig)
+	assert.Equal(t, config.Http.Timeout.Idle, 10)
 }

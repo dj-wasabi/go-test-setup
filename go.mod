@@ -1,6 +1,6 @@
 module werner-dijkerman.nl/test-setup
 
-go 1.23.1
+go 1.23.4
 
 require (
 	github.com/caarlos0/env v3.5.0+incompatible

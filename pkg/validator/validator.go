@@ -1,36 +1,49 @@
 package validator
 
-type Validator struct {
-	Errors map[string]string
-}
+import (
+	"errors"
+	"fmt"
+	"regexp"
 
-// type logging struct {
-// 	logging *slog.Logger
-// }
+	"github.com/go-playground/validator/v10"
+)
 
-func New() *Validator {
-	return &Validator{Errors: make(map[string]string)}
-}
+// Custom check to validate the provided password. Could not find an easy way to rely
+// on the OpenAPI/Struct Validator and making our own validator would be the best way.
+func validatePassword(fl validator.FieldLevel) bool {
+	password := fl.Field().String()
 
-func (v *Validator) AddError(key, message string) {
-	if _, exists := v.Errors[key]; !exists {
-		v.Errors[key] = message
+	var hasLower = regexp.MustCompile(`[[:lower:]]`)
+	var hasUpper = regexp.MustCompile(`[[:upper:]]`)
+	var hasNumber = regexp.MustCompile(`[[:digit:]]`)
+	var hasCharacters = regexp.MustCompile(`[[:graph:]]`)
+
+	if !hasLower.MatchString(password) || !hasUpper.MatchString(password) || !hasNumber.MatchString(password) || !hasCharacters.MatchString(password) {
+		return false
 	}
+
+	return true
 }
 
-func (v *Validator) Check(ok bool, key, message string) {
-	if !ok {
-		v.AddError(key, message)
+func CheckConfig(c any, errormessage map[string]string) error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	err := validate.RegisterValidation("validatePassword", validatePassword)
+	if err != nil {
+		return err
 	}
-}
 
-func (v *Validator) Valid() bool {
-	return len(v.Errors) == 0
-}
+	err = validate.Struct(c)
+	if err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		for _, fieldError := range validationErrors {
+			field := fieldError.StructField()
+			tag := fieldError.Tag()
+			errorKey := fmt.Sprintf("%s.%s", field, tag)
 
-// func (v *Validator) PrintErrors(app any, in map[string]string) {
-// 	logger := logging.Initialize()
-// 	for k, v := range in {
-// 		logger.Error(k, "value", v)
-// 	}
-// }
+			if message, keyFound := errormessage[errorKey]; keyFound {
+				return errors.New(message)
+			}
+		}
+	}
+	return nil
+}

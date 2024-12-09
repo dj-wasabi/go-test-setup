@@ -17,7 +17,7 @@ import (
 
 func Test_authenticate_GetByName(t *testing.T) {
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	os.Setenv("LOGFILE_PATH", "../../../../config.yaml")
+	os.Setenv("CONFIGURATION_FILE", "../../../../config.yaml")
 
 	mt.Run("getbyname_result_yes", func(mt *mtest.T) {
 

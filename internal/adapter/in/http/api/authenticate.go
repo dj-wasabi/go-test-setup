@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
@@ -31,9 +30,7 @@ func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 		return
 	}
 
-	// Validate body, need proper validation error output.
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	errCheck := validate.Struct(e)
+	errCheck := model.ValidateAuthenticationData(&e)
 	if errCheck != nil {
 		error := model.NewError(errCheck.Error())
 		c.JSON(http.StatusBadRequest, error)
