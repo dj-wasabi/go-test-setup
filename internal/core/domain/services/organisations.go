@@ -30,9 +30,7 @@ func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.
 func (c *domainServices) GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, *model.Error) {
 	allOrgs, err := c.org.GetAllOrganisations(context.Background())
 	if err != nil {
-		err = &model.Error{
-			Message: fmt.Sprintf("%v", err),
-		}
+		err = model.NewError(fmt.Sprintf("%v", err))
 	}
 
 	AllOrganisations := &model.ListOrganisations{}

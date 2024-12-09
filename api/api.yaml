@@ -583,10 +583,10 @@ components:
       type: object
       description: Default error response
       required:
-        - message
+        - error
       example:
         message: An error occurred
       properties:
-        message:
+        error:
           type: string
           example: An error occurred

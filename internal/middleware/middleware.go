@@ -48,13 +48,13 @@ func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context
 	if err != nil {
 		l.Debug(fmt.Sprintf("The '%v' has an incorrect token", claims.Username))
 		myError := model.GetError("AUTH001")
-		return errors.New(myError.Message)
+		return errors.New(myError.Error)
 	}
 
 	if !slices.Contains(input.Scopes, claims.Role) {
 		l.Debug(fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", claims.Role))
 		myError := model.GetError("AUTH004")
-		return errors.New(myError.Message)
+		return errors.New(myError.Error)
 	}
 
 	user, _ := po.GetByName(claims.Username, ctx)
@@ -62,6 +62,6 @@ func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context
 		return nil
 	} else {
 		myError := model.GetError("AUTH002")
-		return errors.New(myError.Message)
+		return errors.New(myError.Error)
 	}
 }

@@ -130,7 +130,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		err := json.NewDecoder(rec.Body).Decode(&authError)
 
 		assert.NoError(t, err)
-		assert.Equal(t, authError.Message, "Invalid username/password combination")
+		assert.Equal(t, authError.Error, "Invalid username/password combination")
 	})
 
 	mongoTest.Run("authenticate_username_error", func(mt *mtest.T) {
@@ -151,7 +151,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		err := json.NewDecoder(rec.Body).Decode(&authError)
 
 		assert.NoError(t, err)
-		assert.Equal(t, authError.Message, "The 'username' field needs a minimum amount of 6 characters.")
+		assert.Equal(t, authError.Error, "The 'username' field needs a minimum amount of 6 characters.")
 	})
 
 	mongoTest.Run("authenticate_username_error", func(mt *mtest.T) {
@@ -171,7 +171,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		err := json.NewDecoder(rec.Body).Decode(&authError)
 
 		assert.NoError(t, err)
-		assert.Equal(t, authError.Message, "The field 'password' is required.")
+		assert.Equal(t, authError.Error, "The field 'password' is required.")
 	})
 
 }

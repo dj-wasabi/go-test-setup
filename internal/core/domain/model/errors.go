@@ -16,13 +16,13 @@ var ErrorCodes = map[string]string{
 
 func GetError(error string) *Error {
 	message := &Error{
-		Message: ErrorCodes[error],
+		Error: ErrorCodes[error],
 	}
 	return message
 }
 
 func NewError(error string) *Error {
 	return &Error{
-		Message: error,
+		Error: error,
 	}
 }
