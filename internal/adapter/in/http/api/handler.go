@@ -24,10 +24,17 @@ type envelope map[string]any
 
 var (
 	authentication_requests_per_state = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "authentication_requests_per_state",
-		Help: "A histogram of authentications request durations in seconds per state.",
-	},
-		[]string{"state"})
+		Name: "authentication_http_requests_per_state",
+		Help: "A histogram of authentications request durations with in seconds.",
+	}, []string{"state"})
+	user_create_requests = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "user_create_http_requests",
+		Help: "A histogram for creation of user related request with durations in seconds.",
+	}, []string{"state"})
+	organisation_create_requests = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "organisation_http_create_requests",
+		Help: "A histogram for creation of organisation related request with durations in seconds.",
+	}, []string{"state"})
 )
 
 type ApiHandler struct {
@@ -44,7 +51,8 @@ func NewApiService(as in.ApiUseCases) *ApiHandler {
 
 func RegisterMetrics() {
 	prometheus.Register(authentication_requests_per_state)
-
+	prometheus.Register(user_create_requests)
+	prometheus.Register(organisation_create_requests)
 }
 
 func NewAuthenticator(po out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
