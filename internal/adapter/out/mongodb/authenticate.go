@@ -24,6 +24,7 @@ func (uc *userService) UpdateToken(ctx context.Context, token, username string) 
 		Upsert: &upsert,
 	}
 
+	timeStart := time.Now()
 	_, err := uc.repository.Collection.UpdateOne(
 		ctx,
 		filter,
@@ -32,9 +33,12 @@ func (uc *userService) UpdateToken(ctx context.Context, token, username string) 
 		},
 		&opt,
 	)
+	timeEnd := float64(time.Since(timeStart).Seconds())
 
 	if err != nil {
+		mongodb_user_tokens.WithLabelValues("failure").Observe(timeEnd)
 		return false
 	}
+	mongodb_user_tokens.WithLabelValues("successful").Observe(timeEnd)
 	return true
 }

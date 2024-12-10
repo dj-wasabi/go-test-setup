@@ -24,15 +24,15 @@ type envelope map[string]any
 
 var (
 	authentication_requests_per_state = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "authentication_http_requests_per_state",
+		Name: "adapter_in_http_request_authentication",
 		Help: "A histogram of authentications request durations with in seconds.",
 	}, []string{"state"})
 	user_create_requests = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "user_create_http_requests",
+		Name: "adapter_in_http_request_create_user",
 		Help: "A histogram for creation of user related request with durations in seconds.",
 	}, []string{"state"})
 	organisation_create_requests = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "organisation_http_create_requests",
+		Name: "adapter_in_http_request_create_organisation",
 		Help: "A histogram for creation of organisation related request with durations in seconds.",
 	}, []string{"state"})
 )
@@ -49,7 +49,7 @@ func NewApiService(as in.ApiUseCases) *ApiHandler {
 	}
 }
 
-func RegisterMetrics() {
+func registerMetrics() {
 	prometheus.Register(authentication_requests_per_state)
 	prometheus.Register(user_create_requests)
 	prometheus.Register(organisation_create_requests)
@@ -86,7 +86,7 @@ func NewGinServer(po out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logg
 		},
 	))
 	// Register metrics
-	RegisterMetrics()
+	registerMetrics()
 
 	// Use our validation middleware to check all requests against the
 	// OpenAPI schema.

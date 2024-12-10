@@ -16,7 +16,7 @@ import (
 var (
 	HttpUserRequestsTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "user_http_requests",
+			Name: "adapter_in_http_request_users",
 			Help: "Number of total User related requests.",
 		},
 	)

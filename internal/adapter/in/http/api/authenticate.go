@@ -14,7 +14,7 @@ import (
 var (
 	HttpAuthenticationRequestsTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "authentication_requests",
+			Name: "adapter_in_http_request_authentications",
 			Help: "Number of total Authentication related requests.",
 		},
 	)

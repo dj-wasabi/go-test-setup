@@ -1,6 +1,8 @@
 # go-test-setup
 
-A personal test project to learn golang and try to set it up in a hexagon architecture setup.
+A personal project to learn golang and try to set it up in a hexagon architecture setup. Endpoints and the models/objects are generated via an OpenAPI spec file. It is a very basic API that has Authentication, creating or users and organisation possibilities. This isn't production ready code btw.
+
+Some (Prometheus) metrics are collected and are displayed with the `/v1/metrics` endpoint.
 
 
 
@@ -21,13 +23,3 @@ Or to rollback:
 $ migrate -path=./migrations -database="mongodb://user@pass:localhost:27017/mongo-golang-test" down
 ```
 
-
-# 
-model/services "function" --> port/in/api.go (Interface) --> adapter/in/http/api used via `cs.uc.function>`
-
-
-# 
-port/out (Interface) "function" --> adapter/out/mongodb "function"
-
-
-Graceful server shutdown --> https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/server.go

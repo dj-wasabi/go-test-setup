@@ -4,11 +4,23 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
 )
+
+var (
+	mongodb_user_tokens = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "adapter_out_mongodb_user",
+		Help: "A histogram of authentications request durations with in seconds.",
+	}, []string{"state"})
+)
+
+func registerMetrics() {
+	prometheus.Register(mongodb_user_tokens)
+}
 
 type MongodbRepository struct {
 	DB         *mongo.Database
@@ -16,6 +28,7 @@ type MongodbRepository struct {
 }
 
 func NewMongodbConnection(c *config.Config) *mongo.Database {
+	registerMetrics()
 	return connectServer(c)
 }
 

@@ -56,11 +56,9 @@ func (mc *organisationService) CreateOrganisation(ctx context.Context, org *out.
 func (mc *organisationService) GetAllOrganisations(ctx context.Context) ([]*out.OrganizationPort, *model.Error) {
 
 	mc.logging.Debug("Get all available organisations")
-
 	AllOrganisations := []*out.OrganizationPort{}
 
 	cursor, err := mc.repository.Collection.Find(ctx, bson.D{})
-	// cursor, err := coll.Find(mc.Context, bson.D{})
 	if err == mongo.ErrNoDocuments {
 		mc.logging.Error("No document found")
 	} else if err != nil {

@@ -16,7 +16,7 @@ import (
 var (
 	HttpOrganisationRequestsTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "organisation_http_requests",
+			Name: "adapter_in_http_request_organisations",
 			Help: "Number of total Organisation related requests.",
 		},
 	)
