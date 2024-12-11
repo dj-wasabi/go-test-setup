@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/caarlos0/env"
@@ -71,6 +72,7 @@ func loadConfig() (*Config, error) {
 	if configurationFilePath == "" {
 		configurationFilePath = "config.yaml"
 	}
+	configurationFilePath = filepath.Clean(configurationFilePath)
 	yamlFile, err := os.ReadFile(configurationFilePath)
 	if err != nil {
 		return nil, err

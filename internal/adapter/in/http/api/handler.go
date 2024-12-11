@@ -53,9 +53,9 @@ func NewApiService(as in.ApiUseCases) *ApiHandler {
 }
 
 func registerMetrics() {
-	prometheus.Register(authentication_requests_per_state)
-	prometheus.Register(user_create_requests)
-	prometheus.Register(organisation_create_requests)
+	_ = prometheus.Register(authentication_requests_per_state)
+	_ = prometheus.Register(user_create_requests)
+	_ = prometheus.Register(organisation_create_requests)
 }
 
 func NewAuthenticator(po out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {

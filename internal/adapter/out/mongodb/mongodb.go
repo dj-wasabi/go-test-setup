@@ -19,7 +19,7 @@ var (
 )
 
 func registerMetrics() {
-	prometheus.Register(mongodb_user_tokens)
+	_ = prometheus.Register(mongodb_user_tokens)
 }
 
 type MongodbRepository struct {

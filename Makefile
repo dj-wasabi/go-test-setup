@@ -28,6 +28,10 @@ update:
 test:
 	go test -v ./...
 
+.PHONY: security
+security:
+	gosec -exclude-generated ./...
+
 .PHONY: openapi
 openapi:
 	go generate internal/adapter/in/http/api/server-generator.go

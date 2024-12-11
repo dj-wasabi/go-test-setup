@@ -21,11 +21,19 @@ jobs:
       - name: Generate model structs
         run: go generate internal/core/domain/model/model-generator.go
 
+      - name: Generate model structs (2)
+        run: go generate internal/core/port/in/in-generator.go
+
       - name: Generate Server related functions
         run: go generate internal/adapter/in/http/api/server-generator.go
 
       - name: Test with Go
         run: go test ./... -json > TestResults-${{ matrix.go-version }}.json
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: '-exclude-generated -fmt json ./... > TestResults-gosec-${{ matrix.go-version }}.json'
 
       - name: Build Application
         run: go build -o ./api ./cmd/api
@@ -41,3 +49,9 @@ jobs:
         with:
           name: Go-results-${{ matrix.go-version }}
           path: TestResults-${{ matrix.go-version }}.json
+
+      - name: Upload Gosec test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Go-results-gosec-${{ matrix.go-version }}
+          path: TestResults-gosec-${{ matrix.go-version }}.json

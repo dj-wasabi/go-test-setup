@@ -23,7 +23,7 @@ var (
 )
 
 func registerMetrics() {
-	prometheus.Register(model_authentication_requests)
+	_ = prometheus.Register(model_authentication_requests)
 }
 
 func NewdomainServices(org out.PortOrganisation, usr out.PortUser) in.ApiUseCases {
