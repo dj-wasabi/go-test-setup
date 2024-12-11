@@ -6,6 +6,7 @@ http:
   cors:
     host: http://localhost:8888
   listen: 8888
+  logfile: access.log
 
 # Various timeout configuration options. The values are
 # in seconds.

@@ -28,6 +28,8 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 			log["remote_addr"] = params.ClientIP
 			log["user_agent"] = params.Request.UserAgent()
 			log["referer"] = params.Request.Referer()
+			// Change header to something like sessionid or something.
+			log["something"] = params.Request.Header.Get("PIZZA")
 			// time endresult is logged in milliseconds: 1000943 == 1 second.
 			log["duration"] = time.Duration(params.Latency) / 1000
 

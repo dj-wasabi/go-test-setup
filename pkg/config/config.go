@@ -47,6 +47,7 @@ type database struct {
 
 type http struct {
 	Listen  string  `yaml:"listen" env:"HTTP_LISTEN"`
+	Logfile string  `yaml:"logfile" env:"HTTP_LOGFILE"`
 	Timeout timeout `yaml:"timeout"`
 	Cors    cors    `yaml:"cors"`
 }

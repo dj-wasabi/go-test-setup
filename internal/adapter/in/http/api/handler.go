@@ -3,10 +3,12 @@ package api
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -18,6 +20,7 @@ import (
 	intmid "werner-dijkerman.nl/test-setup/internal/middleware"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
+	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
 type envelope map[string]any
@@ -71,6 +74,15 @@ func NewGinServer(po out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logg
 
 	swagger.Servers = nil
 
+	dir := filepath.Dir(c.Http.Logfile)
+	ok, err := utils.IsWritable(dir)
+	if !ok {
+		h.log.Error(fmt.Sprintf("Error while create a file in directory: '%v'", err))
+		os.Exit(1)
+	}
+
+	f, _ := os.Create(c.Http.Logfile)
+	gin.DefaultWriter = io.MultiWriter(f)
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
 
