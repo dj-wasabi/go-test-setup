@@ -18,6 +18,9 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
+      - name: Install OAPI-CodeGen
+        run: go get github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+
       - name: Generate model structs
         run: go generate internal/core/domain/model/model-generator.go
 
