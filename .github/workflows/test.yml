@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [ '1.23.4' ]
+        go-version: [ '1.22', '1.23' ]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,8 +30,11 @@ jobs:
       - name: Generate Server related functions
         run: go generate internal/adapter/in/http/api/server-generator.go
 
-      - name: Do a go mod edit to specific golang go-version
+      - name: Do a go mod edit to specific golang version
         run: go mod edit -go ${{ matrix.go-version }}
+
+      - name: Do a go mod tidy
+        run: go mod tidy
 
       - name: Test with Go
         run: go test ./... -json > TestResults-${{ matrix.go-version }}.json
