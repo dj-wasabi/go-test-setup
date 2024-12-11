@@ -30,6 +30,9 @@ jobs:
       - name: Generate Server related functions
         run: go generate internal/adapter/in/http/api/server-generator.go
 
+      - name: Do a go mod edit to specific golang go-version
+        run: go mod edit -go ${{ matrix.go-version }}
+
       - name: Test with Go
         run: go test ./... -json > TestResults-${{ matrix.go-version }}.json
 
