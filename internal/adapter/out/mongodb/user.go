@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
+	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
 // adapter
@@ -34,22 +35,22 @@ func NewUserMongoService(repo *MongodbRepository, log *slog.Logger) out.PortUser
 	}
 }
 
-// asasasasasa (These come from port/out/(interface))
 func (uc *userService) Create(ctx context.Context, user *out.UserPort) (*out.UserPort, *model.Error) {
+	uc.logging.Debug("log_id", utils.GetLogId(ctx), "Creating a new user and store it in MongoDB")
 	newUser := out.NewUser(user.GetUsername(), user.GetPassword(), user.GetRole(), user.GetEnabled(), string(user.GetOrgId()))
 
-	uc.logging.Debug(fmt.Sprintf("Creating account with username '%v'", user.GetUsername()))
+	uc.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Creating account with username '%v'", user.GetUsername()))
 	add, err := uc.repository.Collection.InsertOne(ctx, newUser)
 
 	if err != nil {
 		var write_exc mongo.WriteException
 		if !errors.As(err, &write_exc) {
-			uc.logging.Error(fmt.Sprintf("%v", err))
+			uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("%v", err))
 			return &out.UserPort{}, model.GetError("UNKNOWN")
 		}
 
 		if write_exc.HasErrorCodeWithMessage(11000, "index: unique_username_idx") {
-			uc.logging.Error(fmt.Sprintf("User '%v' already exist, unique index violation.", user.GetUsername()))
+			uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("User '%v' already exist, unique index violation.", user.GetUsername()))
 			return &out.UserPort{}, model.GetError("USR0001")
 		}
 	}
@@ -68,18 +69,18 @@ func (uc *userService) Create(ctx context.Context, user *out.UserPort) (*out.Use
 }
 
 func (uc *userService) GetByName(username string, ctx context.Context) (*out.UserPort, *model.Error) {
-	uc.logging.Debug(fmt.Sprintf("About to Create Organisations %v", username))
+	uc.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Get user data from mongodb by looking for user with username: %v", username))
 
-	result := uc.repository.Collection.FindOne(ctx, bson.M{"username": username})
+	result := uc.repository.Collection.FindOne(ctx, bson.M{"username": username, "enabled": true})
 	if result.Err() == mongo.ErrNoDocuments {
-		uc.logging.Info(fmt.Sprintf("User '%v' not found.", username))
+		uc.logging.Info("log_id", utils.GetLogId(ctx), fmt.Sprintf("User '%v' not found.", username))
 		return nil, model.NewError(result.Err().Error())
 	}
 
 	user := new(*out.UserPort)
 	err := result.Decode(&user)
 	if err != nil {
-		uc.logging.Error(fmt.Sprintf("Error while decoding the user object, have error: '%v'", err))
+		uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error while decoding the user object, have error: '%v'", err))
 	}
 
 	return *user, nil

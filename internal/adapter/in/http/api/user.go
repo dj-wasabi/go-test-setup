@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
 // cs.uc --> domain/services/organisation
@@ -23,7 +23,9 @@ var (
 )
 
 func (cs *ApiHandler) UserCreate(c *gin.Context) {
-	cs.log.Debug("Ceate a user")
+	log_id := GetXAppLogId(c)
+	ctx := utils.NewContextWrapper(c, log_id).Build()
+
 	var u model.User
 	if err := c.ShouldBindJSON(&u); err != nil {
 		error := model.NewError(err.Error())
@@ -38,7 +40,7 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 	}
 	HttpUserRequestsTotal.Inc()
 	timeStart := time.Now()
-	createMessage, createError := cs.uc.UserCreate(context.Background(), userObject)
+	createMessage, createError := cs.uc.UserCreate(ctx, userObject)
 	timeEnd := float64(time.Since(timeStart).Seconds())
 
 	if createError != nil {
@@ -52,6 +54,9 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 }
 
 func (cs *ApiHandler) GetUserByID(c *gin.Context, user string) {
+	// log_id := GetXAppLogId(c)
+	// ctx := utils.NewContextWrapper(c, log_id).Build()
+
 	HttpUserRequestsTotal.Inc()
 
 }

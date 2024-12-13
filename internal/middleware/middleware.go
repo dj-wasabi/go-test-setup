@@ -11,10 +11,13 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
+
+var logid string = "X-APP-LOG-ID"
 
 func JsonLoggerMiddleware() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(
@@ -29,7 +32,7 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 			log["user_agent"] = params.Request.UserAgent()
 			log["referer"] = params.Request.Referer()
 			// Change header to something like sessionid or something.
-			log["something"] = params.Request.Header.Get("PIZZA")
+			log["logId"] = params.Request.Header.Get("X-APP-LOG-ID")
 			// time endresult is logged in milliseconds: 1000943 == 1 second.
 			log["duration"] = time.Duration(params.Latency) / 1000
 
@@ -39,28 +42,36 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 	)
 }
 
-func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, input *openapi3filter.AuthenticationInput) error {
+	logId := input.RequestValidationInput.Request.Header.Get(logid)
+	if logId == "" {
+		logId_string := uuid.New()
+		logId = logId_string.String()
+		input.RequestValidationInput.Request.Header.Set(logid, logId_string.String())
+	}
+	ctx := utils.NewContextWrapper(context.TODO(), logId).Build()
+
 	clientToken, err := utils.GetBearerToken(l, input.RequestValidationInput.Request)
 	if err != nil {
-		l.Error(fmt.Sprintf("%v", err.Error()))
+		l.Error("log_id", logId, fmt.Sprintf("%v", err.Error()))
 		return err
 	}
 
-	claims, err := utils.ValidateToken(l, clientToken)
+	claims, err := utils.ValidateToken(l, clientToken, logId)
 	if err != nil {
-		l.Debug(fmt.Sprintf("The '%v' has an incorrect token", claims.Username))
 		myError := model.GetError("AUTH001")
 		return errors.New(myError.Error)
 	}
 
 	if !slices.Contains(input.Scopes, claims.Role) {
-		l.Debug(fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", claims.Role))
+		l.Debug("log_id", logId, fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", claims.Role))
 		myError := model.GetError("AUTH004")
 		return errors.New(myError.Error)
 	}
 
 	user, _ := po.GetByName(claims.Username, ctx)
 	if clientToken == user.Token {
+		l.Debug("log_id", logId, fmt.Sprintf("Successfully validated token for '%v'", claims.Username))
 		return nil
 	} else {
 		myError := model.GetError("AUTH002")

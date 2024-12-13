@@ -2,11 +2,13 @@ package mongodb
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
 // asasasasasa (These come from port/out/(interface))
@@ -24,6 +26,7 @@ func (uc *userService) UpdateToken(ctx context.Context, token, username string) 
 		Upsert: &upsert,
 	}
 
+	uc.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Updating token for username %v", username))
 	timeStart := time.Now()
 	_, err := uc.repository.Collection.UpdateOne(
 		ctx,

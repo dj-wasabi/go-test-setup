@@ -25,6 +25,7 @@ type AuthenticateToken struct {
 // Error Default error response
 type Error struct {
 	Error string `json:"error"`
+	Logid string `json:"logid"`
 }
 
 // MetricsGetResponse Metrics for Prometheus response

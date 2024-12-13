@@ -51,6 +51,11 @@ paths:
         "200":
           description: A paged overview of all organisations
           headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
             X-NEXT:
               example: "http://localhost/api/v1/organisations?page=2&size=25"
               description: A link to the next page of responses
@@ -80,10 +85,17 @@ paths:
                     ]
         "403":
           description: Authentication token is required, otherwise denied access
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
-                message: Authenticated token is required.
+                error: Authenticated token is required.
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
         default:
@@ -111,30 +123,56 @@ paths:
       responses:
         "201":
           description: Successful creation of an organisation
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Organisation"
         default:
           description: When create fails
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
         "403":
           description: Authentication token is required, otherwise denied access
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
-                message: Authenticated token is required.
+                error: Authenticated token is required.
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
         "409":
           description: Organisation already exist
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
                 error: duplicate organisation
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 type: string
                 example: duplicate organisation
@@ -158,6 +196,12 @@ paths:
       responses:
         "200":
           description: Expected response to a valid request
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
@@ -166,10 +210,17 @@ paths:
                 $ref: "#/components/schemas/AuthenticateToken"
         "403":
           description: Unsuccesfull authentication attempt
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
-                message: Invalid username/password combination
+                error: Invalid username/password combination
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
   /v1/user:
@@ -191,6 +242,12 @@ paths:
       responses:
         "201":
           description: Successfully created user
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
@@ -228,21 +285,34 @@ paths:
                     example: admin
         "403":
           description: Authentication token is required, otherwise denied access
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
-                message: Authenticated token is required.
+                error: Authenticated token is required.
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
         "409":
           description: User already exist
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
                 error: duplicate account
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
-                type: string
-                example: duplicate account
+                $ref: "#/components/schemas/Error"
   /v1/user/{user}:
     get:
       summary: Get all users
@@ -262,27 +332,46 @@ paths:
       responses:
         "200":
           description: Get the user
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNoPassword"
         "403":
           description: Authentication token is required, otherwise denied access
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
-                message: Authenticated token is required.
+                error: Authenticated token is required.
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
         "404":
           description: User not exist
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
                 error: user does not exist
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
-                type: string
-                example: user does not exist
+                $ref: "#/components/schemas/Error"
   /v1/health:
     get:
       summary: Health
@@ -293,16 +382,29 @@ paths:
       responses:
         "200":
           description: Healty information
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/MetricsGetResponse"
         "503":
           description: Internal Server Error
+          headers:
+            X-APP-LOG-ID:
+              example: "12345678-1234-1234-1234-1234567890ab"
+              description: Log Id for troubleshooting requests
+              schema:
+                type: string
           content:
             application/json:
               example:
-                message: Internal server error
+                error: Internal server error
+                logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
   /v1/metrics:
@@ -584,9 +686,14 @@ components:
       description: Default error response
       required:
         - error
+        - logid
       example:
-        message: An error occurred
+        error: An error occurred
+        logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
       properties:
         error:
           type: string
           example: An error occurred
+        logid:
+          type: string
+          example: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0

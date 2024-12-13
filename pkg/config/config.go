@@ -30,6 +30,7 @@ var customConfigErrorMessages = map[string]string{
 	"Read.numeric":      "Need to have a proper (numeric) port value.",
 	"Write.required":    "The field 'HTTP_TIMEOUT_WRITE' is required.",
 	"Write.numeric":     "Need to have a proper (numeric) port value.",
+	"Level.oneof":       "Only one of the 'debug', 'info', 'warn', 'warning' or 'error' are allowed.",
 }
 
 type Config struct {
@@ -58,7 +59,7 @@ type cors struct {
 }
 
 type logging struct {
-	Level string `yaml:"level,omitempty" envDefault:"INFO" env:"LOGGING_LEVEL"`
+	Level string `yaml:"level" env:"LOGGING_LEVEL" validate:"oneof=debug info warn warning error"`
 }
 
 type timeout struct {

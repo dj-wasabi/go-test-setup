@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -39,6 +40,7 @@ func Load() *slog.Logger {
 		Level: logLevel,
 	}))
 
+	logger.Info(fmt.Sprintf("The loglevel '%v' is active.", logLevel))
 	return logger
 }
 

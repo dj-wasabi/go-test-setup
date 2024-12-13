@@ -10,7 +10,7 @@ import (
 
 func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.Organisation) (*model.Organisation, *model.Error) {
 	org := out.NewOrganization(command.Name, command.Description, command.Fqdn, command.Enabled, command.Admins)
-	org, err := c.org.CreateOrganisation(context.Background(), org)
+	org, err := c.org.CreateOrganisation(ctx, org)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (c *domainServices) CreateOrganisation(ctx context.Context, command *model.
 }
 
 func (c *domainServices) GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, *model.Error) {
-	allOrgs, err := c.org.GetAllOrganisations(context.Background())
+	allOrgs, err := c.org.GetAllOrganisations(ctx)
 	if err != nil {
 		err = model.NewError(fmt.Sprintf("%v", err))
 	}

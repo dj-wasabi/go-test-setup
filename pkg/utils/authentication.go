@@ -52,7 +52,6 @@ func GenerateToken(username, role string) (signedToken string, err error) {
 
 func GetBearerToken(log *slog.Logger, req *http.Request) (string, error) {
 	authHdr := req.Header.Get("Authorization")
-	log.Debug("bladiebla")
 	if authHdr == "" {
 		return "", ErrNoAuthHeader
 	}
@@ -74,7 +73,7 @@ func HashPassword(password *string) (string, error) {
 	return string(bytes), nil
 }
 
-func ValidateToken(l *slog.Logger, signedToken string) (claims *AuthenticationDetails, msg error) {
+func ValidateToken(l *slog.Logger, signedToken, logId string) (claims *AuthenticationDetails, msg error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&AuthenticationDetails{},
@@ -83,14 +82,16 @@ func ValidateToken(l *slog.Logger, signedToken string) (claims *AuthenticationDe
 		},
 	)
 	if err != nil {
+		l.Error("log_id", logId, fmt.Sprintf("Token decode error '%v'", err))
 		return nil, err
 	}
 
 	claims, ok := token.Claims.(*AuthenticationDetails)
-	l.Debug(fmt.Sprintf("Validating the provided token for user '%v'.", claims.Username))
 	if !ok {
+		l.Error("log_id", logId, fmt.Sprintf("Token validation error '%v'", ok))
 		return nil, ErrInvalidToken
 	}
+	l.Debug("log_id", logId, fmt.Sprintf("Validating the provided token for user '%v'.", claims.Username))
 
 	if claims.ExpiresAt < time.Now().Local().Unix() {
 		return nil, ErrTokenExpired

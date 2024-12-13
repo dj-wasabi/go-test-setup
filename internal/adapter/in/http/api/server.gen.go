@@ -40,6 +40,7 @@ type AuthenticateToken struct {
 // Error Default error response
 type Error struct {
 	Error string `json:"error"`
+	Logid string `json:"logid"`
 }
 
 // MetricsGetResponse Metrics for Prometheus response
@@ -316,22 +317,38 @@ type AuthenticateLoginResponseObject interface {
 	VisitAuthenticateLoginResponse(w http.ResponseWriter) error
 }
 
-type AuthenticateLogin200JSONResponse AuthenticateToken
+type AuthenticateLogin200ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type AuthenticateLogin200JSONResponse struct {
+	Body    AuthenticateToken
+	Headers AuthenticateLogin200ResponseHeaders
+}
 
 func (response AuthenticateLogin200JSONResponse) VisitAuthenticateLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(200)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type AuthenticateLogin403JSONResponse Error
+type AuthenticateLogin403ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type AuthenticateLogin403JSONResponse struct {
+	Body    Error
+	Headers AuthenticateLogin403ResponseHeaders
+}
 
 func (response AuthenticateLogin403JSONResponse) VisitAuthenticateLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(403)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetHealthRequestObject struct {
@@ -341,22 +358,38 @@ type GetHealthResponseObject interface {
 	VisitGetHealthResponse(w http.ResponseWriter) error
 }
 
-type GetHealth200JSONResponse MetricsGetResponse
+type GetHealth200ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetHealth200JSONResponse struct {
+	Body    MetricsGetResponse
+	Headers GetHealth200ResponseHeaders
+}
 
 func (response GetHealth200JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(200)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type GetHealth503JSONResponse Error
+type GetHealth503ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetHealth503JSONResponse struct {
+	Body    Error
+	Headers GetHealth503ResponseHeaders
+}
 
 func (response GetHealth503JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(503)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetMetricsRequestObject struct {
@@ -382,40 +415,70 @@ type CreateOrganisationResponseObject interface {
 	VisitCreateOrganisationResponse(w http.ResponseWriter) error
 }
 
-type CreateOrganisation201JSONResponse Organisation
+type CreateOrganisation201ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type CreateOrganisation201JSONResponse struct {
+	Body    Organisation
+	Headers CreateOrganisation201ResponseHeaders
+}
 
 func (response CreateOrganisation201JSONResponse) VisitCreateOrganisationResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(201)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type CreateOrganisation403JSONResponse Error
+type CreateOrganisation403ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type CreateOrganisation403JSONResponse struct {
+	Body    Error
+	Headers CreateOrganisation403ResponseHeaders
+}
 
 func (response CreateOrganisation403JSONResponse) VisitCreateOrganisationResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(403)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type CreateOrganisation409JSONResponse string
+type CreateOrganisation409ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type CreateOrganisation409JSONResponse struct {
+	Body    string
+	Headers CreateOrganisation409ResponseHeaders
+}
 
 func (response CreateOrganisation409JSONResponse) VisitCreateOrganisationResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(409)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type CreateOrganisationdefaultResponseHeaders struct {
+	XAPPLOGID string
 }
 
 type CreateOrganisationdefaultJSONResponse struct {
 	Body       Error
+	Headers    CreateOrganisationdefaultResponseHeaders
 	StatusCode int
 }
 
 func (response CreateOrganisationdefaultJSONResponse) VisitCreateOrganisationResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(response.StatusCode)
 
 	return json.NewEncoder(w).Encode(response.Body)
@@ -430,6 +493,7 @@ type GetAllOrganisationsResponseObject interface {
 }
 
 type GetAllOrganisations200ResponseHeaders struct {
+	XAPPLOGID string
 	XNEXT     string
 	XPREVIOUS string
 }
@@ -441,6 +505,7 @@ type GetAllOrganisations200JSONResponse struct {
 
 func (response GetAllOrganisations200JSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.Header().Set("X-NEXT", fmt.Sprint(response.Headers.XNEXT))
 	w.Header().Set("X-PREVIOUS", fmt.Sprint(response.Headers.XPREVIOUS))
 	w.WriteHeader(200)
@@ -448,13 +513,21 @@ func (response GetAllOrganisations200JSONResponse) VisitGetAllOrganisationsRespo
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type GetAllOrganisations403JSONResponse Error
+type GetAllOrganisations403ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetAllOrganisations403JSONResponse struct {
+	Body    Error
+	Headers GetAllOrganisations403ResponseHeaders
+}
 
 func (response GetAllOrganisations403JSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(403)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetAllOrganisationsdefaultJSONResponse struct {
@@ -477,39 +550,63 @@ type UserCreateResponseObject interface {
 	VisitUserCreateResponse(w http.ResponseWriter) error
 }
 
+type UserCreate201ResponseHeaders struct {
+	XAPPLOGID string
+}
+
 type UserCreate201JSONResponse struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Enabled   *bool      `json:"enabled,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	OrgId     *string    `json:"org_id,omitempty"`
-	Role      *string    `json:"role,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-	Username  *string    `json:"username,omitempty"`
+	Body struct {
+		CreatedAt *time.Time `json:"created_at,omitempty"`
+		Enabled   *bool      `json:"enabled,omitempty"`
+		Id        *string    `json:"id,omitempty"`
+		OrgId     *string    `json:"org_id,omitempty"`
+		Role      *string    `json:"role,omitempty"`
+		UpdatedAt *time.Time `json:"updated_at,omitempty"`
+		Username  *string    `json:"username,omitempty"`
+	}
+	Headers UserCreate201ResponseHeaders
 }
 
 func (response UserCreate201JSONResponse) VisitUserCreateResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(201)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type UserCreate403JSONResponse Error
+type UserCreate403ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type UserCreate403JSONResponse struct {
+	Body    Error
+	Headers UserCreate403ResponseHeaders
+}
 
 func (response UserCreate403JSONResponse) VisitUserCreateResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(403)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type UserCreate409JSONResponse string
+type UserCreate409ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type UserCreate409JSONResponse struct {
+	Body    Error
+	Headers UserCreate409ResponseHeaders
+}
 
 func (response UserCreate409JSONResponse) VisitUserCreateResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(409)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetUserByIDRequestObject struct {
@@ -520,31 +617,55 @@ type GetUserByIDResponseObject interface {
 	VisitGetUserByIDResponse(w http.ResponseWriter) error
 }
 
-type GetUserByID200JSONResponse UserNoPassword
+type GetUserByID200ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetUserByID200JSONResponse struct {
+	Body    UserNoPassword
+	Headers GetUserByID200ResponseHeaders
+}
 
 func (response GetUserByID200JSONResponse) VisitGetUserByIDResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(200)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type GetUserByID403JSONResponse Error
+type GetUserByID403ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetUserByID403JSONResponse struct {
+	Body    Error
+	Headers GetUserByID403ResponseHeaders
+}
 
 func (response GetUserByID403JSONResponse) VisitGetUserByIDResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(403)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type GetUserByID404JSONResponse string
+type GetUserByID404ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetUserByID404JSONResponse struct {
+	Body    Error
+	Headers GetUserByID404ResponseHeaders
+}
 
 func (response GetUserByID404JSONResponse) VisitGetUserByIDResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
 	w.WriteHeader(404)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 // StrictServerInterface represents all server handlers.
@@ -790,44 +911,47 @@ func (sh *strictHandler) GetUserByID(ctx *gin.Context, user string) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"hcW2xQh2dbL6fwAAAP//L8++o9M4AAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

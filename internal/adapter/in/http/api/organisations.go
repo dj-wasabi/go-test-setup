@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
 // cs.uc --> domain/services/organisation
@@ -23,7 +23,10 @@ var (
 )
 
 func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
-	cs.log.Debug("Ceate an organisation")
+	log_id := GetXAppLogId(c)
+	ctx := utils.NewContextWrapper(c, log_id).Build()
+
+	cs.log.Debug("log_id", log_id, "Ceate an organisation")
 	var e model.Organisation
 	if err := c.ShouldBindJSON(&e); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -38,7 +41,7 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 
 	HttpOrganisationRequestsTotal.Inc()
 	timeStart := time.Now()
-	createOutput, createError := cs.uc.CreateOrganisation(context.Background(), organisationObject)
+	createOutput, createError := cs.uc.CreateOrganisation(ctx, organisationObject)
 	timeEnd := float64(time.Since(timeStart).Seconds())
 	if createError != nil {
 		organisation_create_requests.WithLabelValues("failure").Observe(timeEnd)
@@ -50,9 +53,12 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 }
 
 func (cs *ApiHandler) GetAllOrganisations(c *gin.Context, params GetAllOrganisationsParams) {
-	cs.log.Info("Get all organisations")
+	log_id := GetXAppLogId(c)
+	ctx := utils.NewContextWrapper(c, log_id).Build()
+
+	cs.log.Info("log_id", log_id, "Get all organisations")
 	HttpOrganisationRequestsTotal.Inc()
-	data, _ := cs.uc.GetAllOrganisations(context.Background())
+	data, _ := cs.uc.GetAllOrganisations(ctx)
 
 	c.JSON(http.StatusOK, data)
 }

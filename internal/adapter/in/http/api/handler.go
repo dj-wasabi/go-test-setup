@@ -13,6 +13,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	middleware "github.com/oapi-codegen/gin-middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"werner-dijkerman.nl/test-setup/internal/core/port/in"
@@ -24,6 +25,8 @@ import (
 )
 
 type envelope map[string]any
+
+var logid string = "X-APP-LOG-ID"
 
 var (
 	authentication_requests_per_state = prometheus.NewHistogramVec(prometheus.HistogramOpts{
@@ -52,6 +55,17 @@ func NewApiService(as in.ApiUseCases) *ApiHandler {
 	}
 }
 
+func GetXAppLogId(c *gin.Context) string {
+	log_id := c.Request.Header.Get(logid)
+
+	if log_id == "" {
+		logId_string := uuid.New()
+		log_id = logId_string.String()
+	}
+
+	return log_id
+}
+
 func registerMetrics() {
 	_ = prometheus.Register(authentication_requests_per_state)
 	_ = prometheus.Register(user_create_requests)
@@ -60,7 +74,7 @@ func registerMetrics() {
 
 func NewAuthenticator(po out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
 	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-		return intmid.ValidateSecurityScheme(po, l, ctx, input)
+		return intmid.ValidateSecurityScheme(po, l, input)
 	}
 }
 

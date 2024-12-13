@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
+	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
 var (
@@ -23,6 +23,9 @@ var (
 // cs.uc --> domain/services/authentication.go
 
 func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
+	log_id := GetXAppLogId(c)
+	ctx := utils.NewContextWrapper(c, log_id).Build()
+
 	var e model.AuthenticateRequest
 	if err := c.ShouldBindJSON(&e); err != nil {
 		error := model.NewError(err.Error())
@@ -39,7 +42,7 @@ func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 
 	HttpAuthenticationRequestsTotal.Inc()
 	timeStart := time.Now()
-	token, err := cs.uc.AuthenticateLoginService(context.Background(), e.GetUsername(), e.GetPassword())
+	token, err := cs.uc.AuthenticateLoginService(ctx, e.GetUsername(), e.GetPassword(), log_id)
 	timeEnd := float64(time.Since(timeStart).Seconds())
 
 	if err != nil {
