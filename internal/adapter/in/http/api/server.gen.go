@@ -119,17 +119,17 @@ type ServerInterface interface {
 	// Metrics
 	// (GET /v1/metrics)
 	GetMetrics(c *gin.Context)
-	// Create an organisation
-	// (POST /v1/organisation)
-	CreateOrganisation(c *gin.Context)
 	// Returns all organisations
 	// (GET /v1/organisations)
 	GetAllOrganisations(c *gin.Context, params GetAllOrganisationsParams)
+	// Create an organisation
+	// (POST /v1/organisations)
+	CreateOrganisation(c *gin.Context)
 	// Create User Account
-	// (POST /v1/user)
+	// (POST /v1/users)
 	UserCreate(c *gin.Context)
 	// Get all users
-	// (GET /v1/user/{user})
+	// (GET /v1/users/{user})
 	GetUserByID(c *gin.Context, user string)
 }
 
@@ -181,21 +181,6 @@ func (siw *ServerInterfaceWrapper) GetMetrics(c *gin.Context) {
 	siw.Handler.GetMetrics(c)
 }
 
-// CreateOrganisation operation middleware
-func (siw *ServerInterfaceWrapper) CreateOrganisation(c *gin.Context) {
-
-	c.Set(BearerAuthScopes, []string{"admin"})
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.CreateOrganisation(c)
-}
-
 // GetAllOrganisations operation middleware
 func (siw *ServerInterfaceWrapper) GetAllOrganisations(c *gin.Context) {
 
@@ -230,6 +215,21 @@ func (siw *ServerInterfaceWrapper) GetAllOrganisations(c *gin.Context) {
 	}
 
 	siw.Handler.GetAllOrganisations(c, params)
+}
+
+// CreateOrganisation operation middleware
+func (siw *ServerInterfaceWrapper) CreateOrganisation(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{"admin"})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.CreateOrganisation(c)
 }
 
 // UserCreate operation middleware
@@ -303,10 +303,10 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/v1/auth/login", wrapper.AuthenticateLogin)
 	router.GET(options.BaseURL+"/v1/health", wrapper.GetHealth)
 	router.GET(options.BaseURL+"/v1/metrics", wrapper.GetMetrics)
-	router.POST(options.BaseURL+"/v1/organisation", wrapper.CreateOrganisation)
 	router.GET(options.BaseURL+"/v1/organisations", wrapper.GetAllOrganisations)
-	router.POST(options.BaseURL+"/v1/user", wrapper.UserCreate)
-	router.GET(options.BaseURL+"/v1/user/:user", wrapper.GetUserByID)
+	router.POST(options.BaseURL+"/v1/organisations", wrapper.CreateOrganisation)
+	router.POST(options.BaseURL+"/v1/users", wrapper.UserCreate)
+	router.GET(options.BaseURL+"/v1/users/:user", wrapper.GetUserByID)
 }
 
 type AuthenticateLoginRequestObject struct {
@@ -407,6 +407,64 @@ func (response GetMetrics200Response) VisitGetMetricsResponse(w http.ResponseWri
 	return nil
 }
 
+type GetAllOrganisationsRequestObject struct {
+	Params GetAllOrganisationsParams
+}
+
+type GetAllOrganisationsResponseObject interface {
+	VisitGetAllOrganisationsResponse(w http.ResponseWriter) error
+}
+
+type GetAllOrganisations200ResponseHeaders struct {
+	XAPPLOGID string
+	XNEXT     string
+	XPREVIOUS string
+}
+
+type GetAllOrganisations200JSONResponse struct {
+	Body    Organisations
+	Headers GetAllOrganisations200ResponseHeaders
+}
+
+func (response GetAllOrganisations200JSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
+	w.Header().Set("X-NEXT", fmt.Sprint(response.Headers.XNEXT))
+	w.Header().Set("X-PREVIOUS", fmt.Sprint(response.Headers.XPREVIOUS))
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GetAllOrganisations403ResponseHeaders struct {
+	XAPPLOGID string
+}
+
+type GetAllOrganisations403JSONResponse struct {
+	Body    Error
+	Headers GetAllOrganisations403ResponseHeaders
+}
+
+func (response GetAllOrganisations403JSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GetAllOrganisationsdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response GetAllOrganisationsdefaultJSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 type CreateOrganisationRequestObject struct {
 	Body *CreateOrganisationJSONRequestBody
 }
@@ -479,64 +537,6 @@ type CreateOrganisationdefaultJSONResponse struct {
 func (response CreateOrganisationdefaultJSONResponse) VisitCreateOrganisationResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type GetAllOrganisationsRequestObject struct {
-	Params GetAllOrganisationsParams
-}
-
-type GetAllOrganisationsResponseObject interface {
-	VisitGetAllOrganisationsResponse(w http.ResponseWriter) error
-}
-
-type GetAllOrganisations200ResponseHeaders struct {
-	XAPPLOGID string
-	XNEXT     string
-	XPREVIOUS string
-}
-
-type GetAllOrganisations200JSONResponse struct {
-	Body    Organisations
-	Headers GetAllOrganisations200ResponseHeaders
-}
-
-func (response GetAllOrganisations200JSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
-	w.Header().Set("X-NEXT", fmt.Sprint(response.Headers.XNEXT))
-	w.Header().Set("X-PREVIOUS", fmt.Sprint(response.Headers.XPREVIOUS))
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type GetAllOrganisations403ResponseHeaders struct {
-	XAPPLOGID string
-}
-
-type GetAllOrganisations403JSONResponse struct {
-	Body    Error
-	Headers GetAllOrganisations403ResponseHeaders
-}
-
-func (response GetAllOrganisations403JSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-APP-LOG-ID", fmt.Sprint(response.Headers.XAPPLOGID))
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response.Body)
-}
-
-type GetAllOrganisationsdefaultJSONResponse struct {
-	Body       Error
-	StatusCode int
-}
-
-func (response GetAllOrganisationsdefaultJSONResponse) VisitGetAllOrganisationsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(response.StatusCode)
 
 	return json.NewEncoder(w).Encode(response.Body)
@@ -679,17 +679,17 @@ type StrictServerInterface interface {
 	// Metrics
 	// (GET /v1/metrics)
 	GetMetrics(ctx context.Context, request GetMetricsRequestObject) (GetMetricsResponseObject, error)
-	// Create an organisation
-	// (POST /v1/organisation)
-	CreateOrganisation(ctx context.Context, request CreateOrganisationRequestObject) (CreateOrganisationResponseObject, error)
 	// Returns all organisations
 	// (GET /v1/organisations)
 	GetAllOrganisations(ctx context.Context, request GetAllOrganisationsRequestObject) (GetAllOrganisationsResponseObject, error)
+	// Create an organisation
+	// (POST /v1/organisations)
+	CreateOrganisation(ctx context.Context, request CreateOrganisationRequestObject) (CreateOrganisationResponseObject, error)
 	// Create User Account
-	// (POST /v1/user)
+	// (POST /v1/users)
 	UserCreate(ctx context.Context, request UserCreateRequestObject) (UserCreateResponseObject, error)
 	// Get all users
-	// (GET /v1/user/{user})
+	// (GET /v1/users/{user})
 	GetUserByID(ctx context.Context, request GetUserByIDRequestObject) (GetUserByIDResponseObject, error)
 }
 
@@ -788,6 +788,33 @@ func (sh *strictHandler) GetMetrics(ctx *gin.Context) {
 	}
 }
 
+// GetAllOrganisations operation middleware
+func (sh *strictHandler) GetAllOrganisations(ctx *gin.Context, params GetAllOrganisationsParams) {
+	var request GetAllOrganisationsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAllOrganisations(ctx, request.(GetAllOrganisationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAllOrganisations")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(GetAllOrganisationsResponseObject); ok {
+		if err := validResponse.VisitGetAllOrganisationsResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // CreateOrganisation operation middleware
 func (sh *strictHandler) CreateOrganisation(ctx *gin.Context) {
 	var request CreateOrganisationRequestObject
@@ -814,33 +841,6 @@ func (sh *strictHandler) CreateOrganisation(ctx *gin.Context) {
 		ctx.Status(http.StatusInternalServerError)
 	} else if validResponse, ok := response.(CreateOrganisationResponseObject); ok {
 		if err := validResponse.VisitCreateOrganisationResponse(ctx.Writer); err != nil {
-			ctx.Error(err)
-		}
-	} else if response != nil {
-		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetAllOrganisations operation middleware
-func (sh *strictHandler) GetAllOrganisations(ctx *gin.Context, params GetAllOrganisationsParams) {
-	var request GetAllOrganisationsRequestObject
-
-	request.Params = params
-
-	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetAllOrganisations(ctx, request.(GetAllOrganisationsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetAllOrganisations")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		ctx.Error(err)
-		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetAllOrganisationsResponseObject); ok {
-		if err := validResponse.VisitGetAllOrganisationsResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -911,47 +911,47 @@ func (sh *strictHandler) GetUserByID(ctx *gin.Context, user string) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"hcW2xQh2dbL6fwAAAP//L8++o9M4AAA=",
+	"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",
+	"InuXMDs2m7euzlb/DwAA//9n1oFFwDgAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
