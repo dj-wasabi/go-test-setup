@@ -84,5 +84,6 @@ func NewUser(username, password, role string, enabled bool, orgid string) *UserP
 type PortUser interface {
 	Create(ctx context.Context, user *UserPort) (*UserPort, *model.Error)
 	GetByName(username string, ctx context.Context) (*UserPort, *model.Error)
+	GetById(userId string, ctx context.Context) (*UserPort, *model.Error)
 	UpdateToken(ctx context.Context, token, username string) bool
 }

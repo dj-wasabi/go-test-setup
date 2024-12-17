@@ -43,12 +43,12 @@ func (mc *organisationService) CreateOrganisation(ctx context.Context, org *out.
 		var write_exc mongo.WriteException
 		if !errors.As(err, &write_exc) {
 			mc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("%v", err))
-			return nil, model.GetError("UNKNOWN")
+			return nil, model.GetError("UNKNOWN", utils.GetLogId(ctx))
 		}
 
 		if write_exc.HasErrorCodeWithMessage(11000, "index: unique_name_fqdn_idx") {
 			mc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("User '%v' already exist, unique index violation.", org.Name))
-			return nil, model.GetError("ORG0001")
+			return nil, model.GetError("ORG0001", utils.GetLogId(ctx))
 		}
 	}
 	return org, nil
@@ -64,7 +64,7 @@ func (mc *organisationService) GetAllOrganisations(ctx context.Context) ([]*out.
 		mc.logging.Error("No document found")
 	} else if err != nil {
 		mc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error in mongo %v", err.Error()))
-		return nil, model.GetError("UNKNOWN")
+		return nil, model.GetError("UNKNOWN", utils.GetLogId(ctx))
 	}
 
 	for cursor.Next(ctx) {
@@ -76,6 +76,6 @@ func (mc *organisationService) GetAllOrganisations(ctx context.Context) ([]*out.
 		AllOrganisations = append(AllOrganisations, result)
 	}
 
-	return AllOrganisations, model.GetError("UNKNOWN")
+	return AllOrganisations, model.GetError("UNKNOWN", utils.GetLogId(ctx))
 
 }

@@ -312,14 +312,14 @@ paths:
                 logid: 89b3819a-c7d5-42e2-85e4-5dfaad2d25c0
               schema:
                 $ref: "#/components/schemas/Error"
-  /v1/users/{user}:
+  /v1/users/{userId}:
     get:
       summary: Get all users
       description: Get all users but is a dummy for now
       operationId: getUserByID
       parameters:
         - in: path
-          name: user
+          name: userId
           schema:
             type: string
           required: true

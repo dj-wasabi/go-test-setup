@@ -16,7 +16,7 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 	if err != nil {
 		timeEnd := float64(time.Since(timeStart).Seconds())
 		model_authentication_requests.WithLabelValues("username_failure").Observe(timeEnd)
-		return nil, model.GetError("USR0002")
+		return nil, model.GetError("USR0002", utils.GetLogId(ctx))
 	}
 
 	timeStartNew := time.Now()
@@ -24,11 +24,11 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 	if !verifyPassword {
 		timeEnd := float64(time.Since(timeStartNew).Seconds())
 		model_authentication_requests.WithLabelValues("password_failure").Observe(timeEnd)
-		return nil, model.GetError("USR0002")
+		return nil, model.GetError("USR0002", utils.GetLogId(ctx))
 	}
 
 	timeStartNew = time.Now()
-	token, authenticateError := utils.GenerateToken(username, user.Role)
+	token, authenticateError := utils.GenerateToken(user)
 	c.log.Debug("log_id", log_id, fmt.Sprintf("Generated a new token for the user with '%v' as username", username))
 	if authenticateError != nil {
 		timeEnd := float64(time.Since(timeStartNew).Seconds())

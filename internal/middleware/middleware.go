@@ -51,30 +51,30 @@ func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, input *openapi3filt
 	}
 	ctx := utils.NewContextWrapper(context.TODO(), logId).Build()
 
-	clientToken, err := utils.GetBearerToken(l, input.RequestValidationInput.Request)
+	ad, clientToken, err := utils.GetAuthenticationDetails(l, input.RequestValidationInput.Request, logId)
 	if err != nil {
 		l.Error("log_id", logId, fmt.Sprintf("%v", err.Error()))
 		return err
 	}
 
-	claims, err := utils.ValidateToken(l, clientToken, logId)
+	err = ad.Validate(l, logId)
 	if err != nil {
-		myError := model.GetError("AUTH001")
+		myError := model.GetError("AUTH001", logId)
 		return errors.New(myError.Error)
 	}
 
-	if !slices.Contains(input.Scopes, claims.Role) {
-		l.Debug("log_id", logId, fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", claims.Role))
-		myError := model.GetError("AUTH004")
+	if !slices.Contains(input.Scopes, ad.GetRole()) {
+		l.Debug("log_id", logId, fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", ad.GetRole()))
+		myError := model.GetError("AUTH004", logId)
 		return errors.New(myError.Error)
 	}
 
-	user, _ := po.GetByName(claims.Username, ctx)
+	user, _ := po.GetByName(ad.GetUsername(), ctx)
 	if clientToken == user.Token {
-		l.Debug("log_id", logId, fmt.Sprintf("Successfully validated token for '%v'", claims.Username))
+		l.Debug("log_id", logId, fmt.Sprintf("Successfully validated token for '%v'", ad.GetUsername()))
 		return nil
 	} else {
-		myError := model.GetError("AUTH002")
+		myError := model.GetError("AUTH002", logId)
 		return errors.New(myError.Error)
 	}
 }

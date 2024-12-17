@@ -12,5 +12,6 @@ type ApiUseCases interface {
 	GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, *model.Error)
 	AuthenticateLoginService(ctx context.Context, username, password, log_id string) (*model.AuthenticateToken, *model.Error)
 	UserCreate(ctx context.Context, c *model.User) (*model.UserNoPassword, *model.Error)
+	UserGet(ctx context.Context, userId, log_id string) (*model.UserNoPassword, *model.Error)
 	// GetHealth(ctx context.Context)
 }

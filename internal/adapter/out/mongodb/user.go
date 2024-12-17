@@ -46,12 +46,12 @@ func (uc *userService) Create(ctx context.Context, user *out.UserPort) (*out.Use
 		var write_exc mongo.WriteException
 		if !errors.As(err, &write_exc) {
 			uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("%v", err))
-			return &out.UserPort{}, model.GetError("UNKNOWN")
+			return &out.UserPort{}, model.GetError("UNKNOWN", utils.GetLogId(ctx))
 		}
 
 		if write_exc.HasErrorCodeWithMessage(11000, "index: unique_username_idx") {
 			uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("User '%v' already exist, unique index violation.", user.GetUsername()))
-			return &out.UserPort{}, model.GetError("USR0001")
+			return &out.UserPort{}, model.GetError("USR0001", utils.GetLogId(ctx))
 		}
 	}
 
@@ -79,6 +79,29 @@ func (uc *userService) GetByName(username string, ctx context.Context) (*out.Use
 
 	user := new(*out.UserPort)
 	err := result.Decode(&user)
+	if err != nil {
+		uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error while decoding the user object, have error: '%v'", err))
+	}
+
+	return *user, nil
+}
+
+func (uc *userService) GetById(userId string, ctx context.Context) (*out.UserPort, *model.Error) {
+	uc.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Get user data from mongodb by looking for user with userid: %v", userId))
+
+	objectId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return nil, model.GetError("USR0005", utils.GetLogId(ctx))
+	}
+
+	result := uc.repository.Collection.FindOne(ctx, bson.M{"_id": objectId})
+	if result.Err() == mongo.ErrNoDocuments {
+		uc.logging.Info("log_id", utils.GetLogId(ctx), fmt.Sprintf("User with id '%v' not found.", userId))
+		return nil, model.NewError(result.Err().Error())
+	}
+
+	user := new(*out.UserPort)
+	err = result.Decode(&user)
 	if err != nil {
 		uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error while decoding the user object, have error: '%v'", err))
 	}

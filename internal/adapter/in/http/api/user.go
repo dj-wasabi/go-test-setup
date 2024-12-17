@@ -53,10 +53,27 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 	}
 }
 
-func (cs *ApiHandler) GetUserByID(c *gin.Context, user string) {
-	// log_id := GetXAppLogId(c)
-	// ctx := utils.NewContextWrapper(c, log_id).Build()
+func (cs *ApiHandler) GetUserByID(c *gin.Context, userId string) {
+	log_id := GetXAppLogId(c)
+	ctx := utils.NewContextWrapper(c, log_id).Build()
 
-	HttpUserRequestsTotal.Inc()
+	ad, _, adError := utils.GetAuthenticationDetails(cs.log, c.Request, log_id)
+	if adError != nil {
+		c.AbortWithStatusJSON(http.StatusConflict, adError)
+		return
+	}
 
+	if ad.GetUserId() == userId || ad.GetRole() == "admin" {
+		user, userErr := cs.uc.UserGet(ctx, userId, log_id)
+		if userErr != nil {
+			c.AbortWithStatusJSON(http.StatusConflict, userErr)
+			return
+		} else {
+			c.JSON(http.StatusOK, user)
+		}
+	} else {
+		myError := model.GetError("USR0006", log_id)
+		c.AbortWithStatusJSON(http.StatusForbidden, myError)
+		return
+	}
 }
