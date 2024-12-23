@@ -1,2 +1,4 @@
 .envrc
 access.log
+**.tmp.gos
+

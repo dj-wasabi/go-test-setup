@@ -72,13 +72,13 @@ func registerMetrics() {
 	_ = prometheus.Register(organisation_create_requests)
 }
 
-func NewAuthenticator(po out.PortUser, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
+func NewAuthenticator(po out.PortUser, ts out.PortStore, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
 	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-		return intmid.ValidateSecurityScheme(po, l, input)
+		return intmid.ValidateSecurityScheme(po, ts, l, input)
 	}
 }
 
-func NewGinServer(po out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
+func NewGinServer(po out.PortUser, ts out.PortStore, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
 	swagger, err := GetSwagger()
 
 	if err != nil {
@@ -107,7 +107,7 @@ func NewGinServer(po out.PortUser, h *ApiHandler, c *config.Config, l *slog.Logg
 	r.Use(middleware.OapiRequestValidatorWithOptions(swagger,
 		&middleware.Options{
 			Options: openapi3filter.Options{
-				AuthenticationFunc: NewAuthenticator(po, h, l),
+				AuthenticationFunc: NewAuthenticator(po, ts, h, l),
 			},
 		},
 	))

@@ -35,12 +35,12 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 		model_authentication_requests.WithLabelValues("token_generation_failure").Observe(timeEnd)
 		return nil, model.NewError(authenticateError.Error())
 	}
-	// TMP Disable to continue investigating on how
-	// to make the tests work with the checking part.
-	_ = c.usr.UpdateToken(ctx, token, username)
-	// if !isUpdated {
-	// 	return nil, model.GetError("AUTH002")
-	// }
+
+	// Update tokenstore
+	addError := c.token.Add(ctx, username, token)
+	if addError != nil {
+		return nil, model.NewError(addError.Error())
+	}
 	tokenOutput, tokenError := model.NewAuthenticationToken(token)
 	if tokenError != nil {
 		return nil, model.NewError(tokenError.Error())

@@ -32,7 +32,6 @@ func Test_authenticate_GetByName(t *testing.T) {
 			Enabled:   true,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-			Token:     "somerandomtoken",
 		}
 
 		mt.AddMockResponses(mtest.CreateCursorResponse(1, "testdb.users", mtest.FirstBatch,
@@ -43,14 +42,13 @@ func Test_authenticate_GetByName(t *testing.T) {
 				{Key: "enabled", Value: myUser.Enabled},
 				{Key: "created_at", Value: myUser.CreatedAt},
 				{Key: "updated_at", Value: myUser.UpdatedAt},
-				{Key: "token", Value: myUser.Token},
 			}))
 
 		userData, err := serviceUser.GetByName("myusername", ctx)
 
 		assert.Nil(t, err)
 		assert.Equal(t, userData.GetUsername(), "myusername")
-		assert.Equal(t, userData.Token, "somerandomtoken")
+		assert.Equal(t, userData.Enabled, true)
 	})
 
 	mt.Run("getbyname_result_no", func(mt *mtest.T) {

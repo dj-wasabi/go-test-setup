@@ -10,12 +10,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
+	"werner-dijkerman.nl/test-setup/internal/adapter/out/tokenstore"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/services"
 	"werner-dijkerman.nl/test-setup/internal/core/port/in"
@@ -29,11 +32,14 @@ var (
 	handler             *ApiHandler
 	router              *gin.Engine
 	mongoTest           *mtest.T
-	domainService       in.ApiUseCases
+	authToken           *model.AuthenticateToken
 	repoUser            *mongodb.MongodbRepository
+	logs                *slog.Logger
+	rdb                 *redis.Client
 	serviceUser         out.PortUser
 	serviceOrganisation out.PortOrganisation
-	authToken           *model.AuthenticateToken
+	serviceTokenstore   out.PortStore
+	domainService       in.ApiUseCases
 	authRequest         model.AuthenticateRequest
 	authError           model.Error
 	myUser              out.UserPort
@@ -41,11 +47,12 @@ var (
 )
 
 func prepareTest(t *testing.T) {
+	logs = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
 	mongoTest = mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 	os.Setenv("CONFIGURATION_FILE", "../../../../../config.yaml")
 }
 
-func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
+func prepareDBs(t *testing.T, mt *mtest.T, l *slog.Logger) {
 	repoUser = mongodb.NewUserMongoRepo(mt.DB, "users")
 	serviceUser = mongodb.NewUserMongoService(repoUser, l)
 	_ = config.ReadConfig()
@@ -58,7 +65,6 @@ func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Role:      "admin",
-		Token:     token,
 	}
 
 	token, _ = utils.GenerateToken(&myUser)
@@ -70,15 +76,22 @@ func prepareMongoDB(mt *mtest.T, l *slog.Logger) {
 			{Key: "enabled", Value: myUser.Enabled},
 			{Key: "created_at", Value: myUser.CreatedAt},
 			{Key: "updated_at", Value: myUser.UpdatedAt},
-			{Key: "token", Value: myUser.Token},
 		}))
+
+	s := miniredis.RunT(t)
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     s.Addr(),
+		Password: "",
+		DB:       0,
+	})
 }
 
 func prepareGin() {
 	router = gin.New()
 	gin.SetMode(gin.TestMode)
 
-	domainService = services.NewdomainServices(serviceOrganisation, serviceUser)
+	serviceTokenstore = tokenstore.NewTokenstoreService(rdb, logs)
+	domainService = services.NewdomainServices(serviceTokenstore, serviceOrganisation, serviceUser)
 	handler = NewApiService(domainService)
 	RegisterHandlers(router, handler)
 }
@@ -88,7 +101,7 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 
 	mongoTest.Run("authenticate", func(mt *mtest.T) {
 
-		prepareMongoDB(mt, logging.Initialize())
+		prepareDBs(t, mt, logging.Initialize())
 		prepareGin()
 
 		authRequest = model.AuthenticateRequest{
@@ -98,6 +111,7 @@ func Test_Authenticatelogin_Ok(t *testing.T) {
 		b, _ := json.Marshal(authRequest)
 		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-APP-LOG-ID", "somerandomstring")
 
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
@@ -114,7 +128,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 
 	mongoTest.Run("authenticate", func(mt *mtest.T) {
 
-		prepareMongoDB(mt, logging.Initialize())
+		prepareDBs(t, mt, logging.Initialize())
 		prepareGin()
 
 		authRequest = model.AuthenticateRequest{
@@ -124,6 +138,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		b, _ := json.Marshal(authRequest)
 		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-APP-LOG-ID", "somerandomstring")
 
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
@@ -135,7 +150,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 
 	mongoTest.Run("authenticate_username_error", func(mt *mtest.T) {
 
-		prepareMongoDB(mt, logging.Initialize())
+		prepareDBs(t, mt, logging.Initialize())
 		prepareGin()
 
 		authRequest = model.AuthenticateRequest{
@@ -145,6 +160,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		b, _ := json.Marshal(authRequest)
 		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-APP-LOG-ID", "somerandomstring")
 
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
@@ -156,7 +172,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 
 	mongoTest.Run("authenticate_username_error", func(mt *mtest.T) {
 
-		prepareMongoDB(mt, logging.Initialize())
+		prepareDBs(t, mt, logging.Initialize())
 		prepareGin()
 
 		authRequest = model.AuthenticateRequest{
@@ -165,6 +181,7 @@ func Test_Authenticatelogin_NotOk(t *testing.T) {
 		b, _ := json.Marshal(authRequest)
 		req, _ := http.NewRequest("POST", "/v1/auth/login", bytes.NewReader(b))
 		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-APP-LOG-ID", "somerandomstring")
 
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)

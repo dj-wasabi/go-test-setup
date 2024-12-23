@@ -34,9 +34,10 @@ var customConfigErrorMessages = map[string]string{
 }
 
 type Config struct {
-	Http     http     `yaml:"http"`
-	Database database `yaml:"database"`
-	Logging  logging  `yaml:"logging"`
+	Http        http       `yaml:"http"`
+	Database    database   `yaml:"database"`
+	Logging     logging    `yaml:"logging"`
+	Tokentstore tokenstore `yaml:"tokenstore"`
 }
 
 type database struct {
@@ -45,6 +46,15 @@ type database struct {
 	Username string `yaml:"username,omitempty" env:"DATABASE_USERNAME"`
 	Password string `yaml:"password,omitempty" env:"DATABASE_PASSWORD"`
 	Dbname   string `yaml:"dbname" env:"DATABASE_DBNAME" validate:"required"`
+}
+
+type tokenstore struct {
+	Hostname string `yaml:"hostname" env:"TOKENSTORE_HOSTNAME" validate:"required,hostname"`
+	Port     int    `yaml:"port,omitempty" envDefault:"6379" env:"TOKENSTORE_PORT" validate:"required,numeric"`
+	Username string `yaml:"username,omitempty" env:"TOKENSTORE_USERNAME"`
+	Password string `yaml:"password,omitempty" env:"TOKENSTORE_PASSWORD"`
+	Dbname   string `yaml:"dbname" env:"TOKENSTORE_DBNAME" validate:"required"`
+	Protocol int    `yaml:"protocol" validate:"oneof=2 3"`
 }
 
 type http struct {
