@@ -15,5 +15,13 @@ database:
   password: password
   dbname: mongo-golang-test
 
+tokenstore:
+  hostname: localhost
+  port: 6379
+  username: username
+  password: password
+  dbname: 0
+  protocol: 3
+
 logging:
   level: info

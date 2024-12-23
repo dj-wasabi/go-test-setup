@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -12,12 +11,11 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
-var logid string = "X-APP-LOG-ID"
+var logHeaderString string = "X-APP-LOG-ID"
 
 func JsonLoggerMiddleware() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(
@@ -42,39 +40,46 @@ func JsonLoggerMiddleware() gin.HandlerFunc {
 	)
 }
 
-func ValidateSecurityScheme(po out.PortUser, l *slog.Logger, input *openapi3filter.AuthenticationInput) error {
-	logId := input.RequestValidationInput.Request.Header.Get(logid)
-	if logId == "" {
-		logId_string := uuid.New()
-		logId = logId_string.String()
-		input.RequestValidationInput.Request.Header.Set(logid, logId_string.String())
+func ensureLogID(input *openapi3filter.AuthenticationInput) string {
+	logID := input.RequestValidationInput.Request.Header.Get(logHeaderString)
+	if logID == "" {
+		newLogID := uuid.New().String()
+		input.RequestValidationInput.Request.Header.Set(logHeaderString, newLogID)
+		logID = newLogID
 	}
+	return logID
+}
+
+func ValidateSecurityScheme(po out.PortUser, ts out.PortStore, l *slog.Logger, input *openapi3filter.AuthenticationInput) error {
+	logId := ensureLogID(input)
 	ctx := utils.NewContextWrapper(context.TODO(), logId).Build()
 
-	ad, clientToken, err := utils.GetAuthenticationDetails(l, input.RequestValidationInput.Request, logId)
+	// Get token information and validate the token
+	adToken, providedToken, err := utils.GetAuthenticationDetails(l, input.RequestValidationInput.Request, logId)
 	if err != nil {
-		l.Error("log_id", logId, fmt.Sprintf("%v", err.Error()))
+		l.Error("log_id", logId, fmt.Sprintf("Failed to get authentication details: %v", err.Error()))
 		return err
 	}
 
-	err = ad.Validate(l, logId)
-	if err != nil {
-		myError := model.GetError("AUTH001", logId)
-		return errors.New(myError.Error)
+	if validateError := adToken.Validate(l, logId); validateError != nil {
+		return utils.HandleAuthError("AUTH001", logId, l)
 	}
 
-	if !slices.Contains(input.Scopes, ad.GetRole()) {
-		l.Debug("log_id", logId, fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", ad.GetRole()))
-		myError := model.GetError("AUTH004", logId)
-		return errors.New(myError.Error)
+	if !slices.Contains(input.Scopes, adToken.GetRole()) {
+		l.Debug("log_id", logId, fmt.Sprintf("The '%v' is not port of the allowed roles/scopes.", adToken.GetRole()))
+		return utils.HandleAuthError("AUTH004", logId, l)
 	}
 
-	user, _ := po.GetByName(ad.GetUsername(), ctx)
-	if clientToken == user.Token {
-		l.Debug("log_id", logId, fmt.Sprintf("Successfully validated token for '%v'", ad.GetUsername()))
-		return nil
-	} else {
-		myError := model.GetError("AUTH002", logId)
-		return errors.New(myError.Error)
+	// Verify user status
+	if err := utils.ValidateUserStatus(po, ctx, adToken.GetUsername(), logId, l); err != nil {
+		return err
 	}
+
+	// Validate token against stored token
+	if err := utils.ValidateStoredToken(ts, ctx, adToken.GetUsername(), providedToken, logId, l); err != nil {
+		return err
+	}
+
+	l.Debug("log_id", logId, fmt.Sprintf("Successfully validated token for '%v'", adToken.GetUsername()))
+	return nil
 }

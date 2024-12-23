@@ -11,6 +11,7 @@ import (
 
 	"werner-dijkerman.nl/test-setup/internal/adapter/in/http/api"
 	"werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb"
+	"werner-dijkerman.nl/test-setup/internal/adapter/out/tokenstore"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/services"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
@@ -23,14 +24,16 @@ func main() {
 	c := config.ReadConfig()
 
 	con := mongodb.NewMongodbConnection(c)
+	red := tokenstore.NewTokenstoreConnection(c)
 	repoOrg := mongodb.NewOrganisationMongoRepo(con, "organisations")
 	repoUser := mongodb.NewUserMongoRepo(con, "users")
 
 	serviceOrganisation := mongodb.NewOrganisationMongoService(repoOrg, logger)
 	serviceUser := mongodb.NewUserMongoService(repoUser, logger)
-	ds := services.NewdomainServices(serviceOrganisation, serviceUser)
+	serviceTokenStore := tokenstore.NewTokenstoreService(red, logger)
+	ds := services.NewdomainServices(serviceTokenStore, serviceOrganisation, serviceUser)
 
-	server := api.NewGinServer(serviceUser, api.NewApiService(ds), c, logger)
+	server := api.NewGinServer(serviceUser, serviceTokenStore, api.NewApiService(ds), c, logger)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

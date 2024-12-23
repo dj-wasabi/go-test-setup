@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
+	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
@@ -122,4 +124,38 @@ func HashPassword(password *string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func HandleAuthError(errorCode, logID string, logger *slog.Logger) error {
+	err := model.GetError(errorCode, logID)
+	logger.Error("log_id", logID, err.Error)
+	return errors.New(err.Error)
+}
+
+func ValidateUserStatus(po out.PortUser, ctx context.Context, username, logId string, l *slog.Logger) error {
+	user, err := po.GetByName(username, ctx)
+	if err != nil {
+		l.Error("log_id", logId, fmt.Sprintf("Failed to fetch user '%v': %v", username, err))
+		return HandleAuthError("AUTH002", logId, l)
+	}
+
+	if !user.Enabled {
+		l.Debug("log_id", logId, fmt.Sprintf("User '%v' is not enabled.", username))
+		return HandleAuthError("AUTH005", logId, l)
+	}
+	return nil
+}
+
+func ValidateStoredToken(ts out.PortStore, ctx context.Context, username, providedToken, logId string, l *slog.Logger) error {
+	storedToken, err := ts.Get(ctx, username)
+	if err != nil {
+		l.Error("log_id", logId, fmt.Sprintf("Failed to fetch stored token for '%v': %v", username, err))
+		return HandleAuthError("AUTH003", logId, l)
+	}
+
+	if storedToken != providedToken {
+		l.Debug("log_id", logId, "Provided token does not match stored token.")
+		return HandleAuthError("AUTH003", logId, l)
+	}
+	return nil
 }

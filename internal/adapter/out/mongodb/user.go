@@ -71,7 +71,7 @@ func (uc *userService) Create(ctx context.Context, user *out.UserPort) (*out.Use
 func (uc *userService) GetByName(username string, ctx context.Context) (*out.UserPort, *model.Error) {
 	uc.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Get user data from mongodb by looking for user with username: %v", username))
 
-	result := uc.repository.Collection.FindOne(ctx, bson.M{"username": username, "enabled": true})
+	result := uc.repository.Collection.FindOne(ctx, bson.M{"username": username})
 	if result.Err() == mongo.ErrNoDocuments {
 		uc.logging.Info("log_id", utils.GetLogId(ctx), fmt.Sprintf("User '%v' not found.", username))
 		return nil, model.NewError(result.Err().Error())

@@ -10,9 +10,10 @@ import (
 )
 
 type domainServices struct {
-	log *slog.Logger
-	org out.PortOrganisation
-	usr out.PortUser
+	log   *slog.Logger
+	org   out.PortOrganisation
+	usr   out.PortUser
+	token out.PortStore
 }
 
 var (
@@ -26,11 +27,12 @@ func registerMetrics() {
 	_ = prometheus.Register(model_authentication_requests)
 }
 
-func NewdomainServices(org out.PortOrganisation, usr out.PortUser) in.ApiUseCases {
+func NewdomainServices(token out.PortStore, org out.PortOrganisation, usr out.PortUser) in.ApiUseCases {
 	registerMetrics()
 	return &domainServices{
-		log: logging.Initialize(),
-		org: org,
-		usr: usr,
+		log:   logging.Initialize(),
+		org:   org,
+		usr:   usr,
+		token: token,
 	}
 }

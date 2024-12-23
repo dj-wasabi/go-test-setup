@@ -15,6 +15,7 @@ var ErrorCodes = map[string]string{
 	"AUTH002": "Error while updating the token, try again.",
 	"AUTH003": "Invalid token/user combination.",
 	"AUTH004": "Role does not have permissions to access this endpoint.",
+	"AUTH005": "User not found or not yet activated.",
 }
 
 func GetError(error, log_id string) *Error {
