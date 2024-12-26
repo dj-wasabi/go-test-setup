@@ -12,7 +12,6 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
-	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 )
 
@@ -22,6 +21,16 @@ type AuthenticationDetails struct {
 	OrgId    string
 	Role     string
 	jwt.StandardClaims
+}
+
+type AuthenticationImpl struct {
+	Authentication
+}
+
+type Authentication interface {
+	ValidatePassword(string, string) (bool, error)
+	HashPassword(*string) (string, error)
+	GetAuthenticationDetails(*http.Request, string) (*AuthenticationDetails, string, error)
 }
 
 var (
@@ -52,7 +61,11 @@ func (ad *AuthenticationDetails) GetToken() jwt.Claims {
 	return ad.StandardClaims
 }
 
-func GetAuthenticationDetails(log *slog.Logger, req *http.Request, logId string) (*AuthenticationDetails, string, error) {
+func NewAuthentication() Authentication {
+	return AuthenticationImpl{}
+}
+
+func (ai AuthenticationImpl) GetAuthenticationDetails(req *http.Request, logId string) (*AuthenticationDetails, string, error) {
 	authHdr := req.Header.Get("Authorization")
 	if authHdr == "" {
 		return &AuthenticationDetails{}, "", ErrNoAuthHeader
@@ -72,7 +85,6 @@ func GetAuthenticationDetails(log *slog.Logger, req *http.Request, logId string)
 	}
 	newClaims, ok := jwtToken.Claims.(*AuthenticationDetails)
 	if !ok {
-		log.Error("log_id", logId, fmt.Sprintf("Token validation error '%v'", ok))
 		return nil, "", ErrInvalidToken
 	}
 
@@ -94,12 +106,21 @@ func (ad *AuthenticationDetails) Validate(l *slog.Logger, logId string) error {
 	return nil
 }
 
-func ValidatePassword(providedpassword, storedpassword string) bool {
+func (ai AuthenticationImpl) ValidatePassword(providedpassword, storedpassword string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(storedpassword), []byte(providedpassword))
 	if err != nil {
-		return false
+		return false, err
 	}
-	return true
+	return true, nil
+}
+
+func (ai AuthenticationImpl) HashPassword(password *string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(*password), 14)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
 }
 
 func GenerateToken(user *out.UserPort) (signedToken string, err error) {
@@ -117,22 +138,7 @@ func GenerateToken(user *out.UserPort) (signedToken string, err error) {
 	return token, err
 }
 
-func HashPassword(password *string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(*password), 14)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bytes), nil
-}
-
-func HandleAuthError(errorCode, logID string, logger *slog.Logger) error {
-	err := model.GetError(errorCode, logID)
-	logger.Error("log_id", logID, err.Error)
-	return errors.New(err.Error)
-}
-
-func ValidateUserStatus(po out.PortUser, ctx context.Context, username, logId string, l *slog.Logger) error {
+func ValidateUserStatus(po out.PortUserInterface, ctx context.Context, username, logId string, l *slog.Logger) error {
 	user, err := po.GetByName(username, ctx)
 	if err != nil {
 		l.Error("log_id", logId, fmt.Sprintf("Failed to fetch user '%v': %v", username, err))
@@ -146,7 +152,7 @@ func ValidateUserStatus(po out.PortUser, ctx context.Context, username, logId st
 	return nil
 }
 
-func ValidateStoredToken(ts out.PortStore, ctx context.Context, username, providedToken, logId string, l *slog.Logger) error {
+func ValidateStoredToken(ts out.PortStoreInterface, ctx context.Context, username, providedToken, logId string, l *slog.Logger) error {
 	storedToken, err := ts.Get(ctx, username)
 	if err != nil {
 		l.Error("log_id", logId, fmt.Sprintf("Failed to fetch stored token for '%v': %v", username, err))

@@ -65,7 +65,7 @@ func NewOrganization(name, description, fqdn string, enabled bool, admins []stri
 }
 
 // TODO found in adapter/out/mongodb/{organisations,authenticate}.go
-type PortOrganisation interface {
+type PortOrganisationInterface interface {
 	CreateOrganisation(ctx context.Context, org *OrganizationPort) (*OrganizationPort, *model.Error)
 	GetAllOrganisations(ctx context.Context) ([]*OrganizationPort, *model.Error)
 }

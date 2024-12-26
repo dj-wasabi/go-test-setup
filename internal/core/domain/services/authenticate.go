@@ -12,7 +12,7 @@ import (
 func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password, log_id string) (*model.AuthenticateToken, *model.Error) {
 	timeStart := time.Now()
 	user, err := c.usr.GetByName(username, ctx)
-	c.log.Debug("log_id", log_id, fmt.Sprintf("We have the '%v' username", username))
+	c.log.Info("log_id", log_id, fmt.Sprintf("We have the '%v' username", username))
 	if err != nil {
 		timeEnd := float64(time.Since(timeStart).Seconds())
 		model_authentication_requests.WithLabelValues("username_failure").Observe(timeEnd)
@@ -20,8 +20,9 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 	}
 
 	timeStartNew := time.Now()
-	verifyPassword := utils.ValidatePassword(password, user.Password)
-	if !verifyPassword {
+	auth := utils.NewAuthentication()
+
+	if verifyPassword, _ := auth.ValidatePassword(password, user.Password); !verifyPassword {
 		timeEnd := float64(time.Since(timeStartNew).Seconds())
 		model_authentication_requests.WithLabelValues("password_failure").Observe(timeEnd)
 		return nil, model.GetError("USR0002", utils.GetLogId(ctx))
@@ -37,10 +38,10 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 	}
 
 	// Update tokenstore
-	addError := c.token.Add(ctx, username, token)
-	if addError != nil {
+	if addError := c.token.Add(ctx, username, token); addError != nil {
 		return nil, model.NewError(addError.Error())
 	}
+
 	tokenOutput, tokenError := model.NewAuthenticationToken(token)
 	if tokenError != nil {
 		return nil, model.NewError(tokenError.Error())

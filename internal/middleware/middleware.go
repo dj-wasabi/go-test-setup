@@ -15,7 +15,7 @@ import (
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
 
-var logHeaderString string = "X-APP-LOG-ID"
+const logHeaderString string = "X-APP-LOG-ID"
 
 func JsonLoggerMiddleware() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(
@@ -50,12 +50,13 @@ func ensureLogID(input *openapi3filter.AuthenticationInput) string {
 	return logID
 }
 
-func ValidateSecurityScheme(po out.PortUser, ts out.PortStore, l *slog.Logger, input *openapi3filter.AuthenticationInput) error {
+func ValidateSecurityScheme(po out.PortUserInterface, ts out.PortStoreInterface, l *slog.Logger, input *openapi3filter.AuthenticationInput) error {
 	logId := ensureLogID(input)
 	ctx := utils.NewContextWrapper(context.TODO(), logId).Build()
 
 	// Get token information and validate the token
-	adToken, providedToken, err := utils.GetAuthenticationDetails(l, input.RequestValidationInput.Request, logId)
+	auth := utils.NewAuthentication()
+	adToken, providedToken, err := auth.GetAuthenticationDetails(input.RequestValidationInput.Request, logId)
 	if err != nil {
 		l.Error("log_id", logId, fmt.Sprintf("Failed to get authentication details: %v", err.Error()))
 		return err

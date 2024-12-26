@@ -21,7 +21,6 @@ func NewContextWrapper(con context.Context, logId string) ContextWrapper {
 }
 
 func (w ContextWrapper) Build() context.Context {
-	// slog.Debug("Build", "content", "About to build context", "attributes", w.m)
 	for k, v := range w.m {
 		w.ctx = context.WithValue(w.ctx, k, v)
 	}

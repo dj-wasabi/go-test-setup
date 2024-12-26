@@ -28,7 +28,7 @@ func NewUserMongoRepo(con *mongo.Database, collection string) *MongodbRepository
 	}
 }
 
-func NewUserMongoService(repo *MongodbRepository, log *slog.Logger) out.PortUser {
+func NewUserMongoService(repo *MongodbRepository, log *slog.Logger) out.PortUserInterface {
 	return &userService{
 		logging:    log,
 		repository: repo,

@@ -28,26 +28,24 @@ func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 
 	var e model.AuthenticateRequest
 	if err := c.ShouldBindJSON(&e); err != nil {
-		error := model.NewError(err.Error())
-		c.JSON(http.StatusBadRequest, error)
+		utils.HandleHTTPError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	errCheck := model.ValidateAuthenticationData(&e)
-	if errCheck != nil {
-		error := model.NewError(errCheck.Error())
-		c.JSON(http.StatusBadRequest, error)
+	if errCheck := model.ValidateAuthenticationData(&e); errCheck != nil {
+		utils.HandleHTTPError(c, http.StatusBadRequest, errCheck)
 		return
 	}
 
 	HttpAuthenticationRequestsTotal.Inc()
 	timeStart := time.Now()
-	token, err := cs.uc.AuthenticateLoginService(ctx, e.GetUsername(), e.GetPassword(), log_id)
+
+	token, tokenErr := cs.uc.AuthenticateLoginService(ctx, e.GetUsername(), e.GetPassword(), log_id)
 	timeEnd := float64(time.Since(timeStart).Seconds())
 
-	if err != nil {
+	if tokenErr != nil {
 		authentication_requests_per_state.WithLabelValues("failure").Observe(timeEnd)
-		c.JSON(http.StatusUnauthorized, err)
+		c.JSON(http.StatusUnauthorized, tokenErr)
 		return
 	}
 	authentication_requests_per_state.WithLabelValues("successful").Observe(timeEnd)

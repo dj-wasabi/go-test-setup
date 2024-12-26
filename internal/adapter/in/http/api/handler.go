@@ -44,11 +44,11 @@ var (
 )
 
 type ApiHandler struct {
-	uc  in.ApiUseCases
+	uc  in.ApiUseCasesInterface
 	log *slog.Logger
 }
 
-func NewApiService(as in.ApiUseCases) *ApiHandler {
+func NewApiService(as in.ApiUseCasesInterface) *ApiHandler {
 	return &ApiHandler{
 		uc:  as,
 		log: logging.Initialize(),
@@ -72,13 +72,13 @@ func registerMetrics() {
 	_ = prometheus.Register(organisation_create_requests)
 }
 
-func NewAuthenticator(po out.PortUser, ts out.PortStore, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
+func NewAuthenticator(po out.PortUserInterface, ts out.PortStoreInterface, h *ApiHandler, l *slog.Logger) openapi3filter.AuthenticationFunc {
 	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 		return intmid.ValidateSecurityScheme(po, ts, l, input)
 	}
 }
 
-func NewGinServer(po out.PortUser, ts out.PortStore, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
+func NewGinServer(po out.PortUserInterface, ts out.PortStoreInterface, h *ApiHandler, c *config.Config, l *slog.Logger) *http.Server {
 	swagger, err := GetSwagger()
 
 	if err != nil {

@@ -36,10 +36,10 @@ var (
 	repoUser            *mongodb.MongodbRepository
 	logs                *slog.Logger
 	rdb                 *redis.Client
-	serviceUser         out.PortUser
-	serviceOrganisation out.PortOrganisation
-	serviceTokenstore   out.PortStore
-	domainService       in.ApiUseCases
+	serviceUser         out.PortUserInterface
+	serviceOrganisation out.PortOrganisationInterface
+	serviceTokenstore   out.PortStoreInterface
+	domainService       in.ApiUseCasesInterface
 	authRequest         model.AuthenticateRequest
 	authError           model.Error
 	myUser              out.UserPort

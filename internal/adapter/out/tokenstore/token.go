@@ -10,8 +10,7 @@ import (
 func (ts *tokenstoreService) Add(ctx context.Context, username, token string) error {
 	ts.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Set token data for username: %v", username))
 
-	err := ts.client.Set(ctx, username, token, 0).Err()
-	if err != nil {
+	if err := ts.client.Set(ctx, username, token, 0).Err(); err != nil {
 		ts.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error while adding token to tokenstore: %v", err.Error()))
 		return err
 	}

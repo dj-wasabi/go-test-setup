@@ -7,7 +7,7 @@ import (
 )
 
 // TODO found in adapter/in/http/api/{organisations,authenticate,user}.go
-type ApiUseCases interface {
+type ApiUseCasesInterface interface {
 	CreateOrganisation(ctx context.Context, c *model.Organisation) (*model.Organisation, *model.Error)
 	GetAllOrganisations(ctx context.Context) (*model.ListOrganisations, *model.Error)
 	AuthenticateLoginService(ctx context.Context, username, password, log_id string) (*model.AuthenticateToken, *model.Error)

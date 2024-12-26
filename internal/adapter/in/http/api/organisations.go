@@ -41,6 +41,7 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 
 	HttpOrganisationRequestsTotal.Inc()
 	timeStart := time.Now()
+
 	createOutput, createError := cs.uc.CreateOrganisation(ctx, organisationObject)
 	timeEnd := float64(time.Since(timeStart).Seconds())
 	if createError != nil {

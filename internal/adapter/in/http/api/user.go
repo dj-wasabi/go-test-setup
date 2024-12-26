@@ -57,7 +57,8 @@ func (cs *ApiHandler) GetUserByID(c *gin.Context, userId string) {
 	log_id := GetXAppLogId(c)
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
-	ad, _, adError := utils.GetAuthenticationDetails(cs.log, c.Request, log_id)
+	auth := utils.NewAuthentication()
+	ad, _, adError := auth.GetAuthenticationDetails(c.Request, log_id)
 	if adError != nil {
 		c.AbortWithStatusJSON(http.StatusConflict, adError)
 		return

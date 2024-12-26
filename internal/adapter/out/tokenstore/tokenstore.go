@@ -15,7 +15,7 @@ type tokenstoreService struct {
 	client  *redis.Client
 }
 
-func NewTokenstoreService(token *redis.Client, log *slog.Logger) out.PortStore {
+func NewTokenstoreService(token *redis.Client, log *slog.Logger) out.PortStoreInterface {
 	return &tokenstoreService{
 		logging: log,
 		client:  token,

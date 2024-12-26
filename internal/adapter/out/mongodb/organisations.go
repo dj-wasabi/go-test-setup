@@ -26,7 +26,7 @@ func NewOrganisationMongoRepo(con *mongo.Database, collection string) *MongodbRe
 	}
 }
 
-func NewOrganisationMongoService(repo *MongodbRepository, log *slog.Logger) out.PortOrganisation {
+func NewOrganisationMongoService(repo *MongodbRepository, log *slog.Logger) out.PortOrganisationInterface {
 	return &organisationService{
 		logging:    log,
 		repository: repo,
