@@ -38,8 +38,7 @@ func NewOrganisationMongoService(repo *MongodbRepository, log *slog.Logger) out.
 func (mc *organisationService) CreateOrganisation(ctx context.Context, org *out.OrganizationPort) (*out.OrganizationPort, *model.Error) {
 	org = out.NewOrganization(org.GetName(), org.GetDescription(), org.GetFqdn(), org.GetEnabled(), org.GetAdmins())
 
-	_, err := mc.repository.Collection.InsertOne(ctx, org)
-	if err != nil {
+	if _, err := mc.repository.Collection.InsertOne(ctx, org); err != nil {
 		var write_exc mongo.WriteException
 		if !errors.As(err, &write_exc) {
 			mc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("%v", err))

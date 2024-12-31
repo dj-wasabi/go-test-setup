@@ -106,15 +106,14 @@ func (ad *AuthenticationDetails) Validate(l *slog.Logger, logId string) error {
 	return nil
 }
 
-func (ai AuthenticationImpl) ValidatePassword(providedpassword, storedpassword string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(storedpassword), []byte(providedpassword))
-	if err != nil {
+func (AuthenticationImpl) ValidatePassword(providedpassword, storedpassword string) (bool, error) {
+	if err := bcrypt.CompareHashAndPassword([]byte(storedpassword), []byte(providedpassword)); err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
-func (ai AuthenticationImpl) HashPassword(password *string) (string, error) {
+func (AuthenticationImpl) HashPassword(password *string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(*password), 14)
 	if err != nil {
 		return "", err
@@ -134,8 +133,8 @@ func GenerateToken(user *out.UserPort) (signedToken string, err error) {
 		},
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
-	return token, err
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
+	// return token, err
 }
 
 func ValidateUserStatus(po out.PortUserInterface, ctx context.Context, username, logId string, l *slog.Logger) error {

@@ -12,7 +12,7 @@ import (
 func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password, log_id string) (*model.AuthenticateToken, *model.Error) {
 	timeStart := time.Now()
 	user, err := c.usr.GetByName(username, ctx)
-	c.log.Info("log_id", log_id, fmt.Sprintf("We have the '%v' username", username))
+	c.log.Debug("log_id", log_id, fmt.Sprintf("We have the '%v' username", username))
 	if err != nil {
 		timeEnd := float64(time.Since(timeStart).Seconds())
 		model_authentication_requests.WithLabelValues("username_failure").Observe(timeEnd)
@@ -24,7 +24,7 @@ func (c *domainServices) AuthenticateLoginService(ctx context.Context, username,
 
 	if verifyPassword, _ := auth.ValidatePassword(password, user.Password); !verifyPassword {
 		timeEnd := float64(time.Since(timeStartNew).Seconds())
-		model_authentication_requests.WithLabelValues("password_failure").Observe(timeEnd)
+		model_authentication_requests.WithLabelValues("password_validation_failure").Observe(timeEnd)
 		return nil, model.GetError("USR0002", utils.GetLogId(ctx))
 	}
 

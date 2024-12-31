@@ -94,24 +94,19 @@ func loadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	err = env.Parse(&configInstance.Http)
-	if err != nil {
+	if err = env.Parse(&configInstance.Http); err != nil {
 		slog.Info(fmt.Sprintf("Error: %v", err))
 	}
-	err = env.Parse(&configInstance.Http.Timeout)
-	if err != nil {
+	if err = env.Parse(&configInstance.Http.Timeout); err != nil {
 		slog.Info(fmt.Sprintf("Error: %v", err))
 	}
-	err = env.Parse(&configInstance.Http.Cors)
-	if err != nil {
+	if err = env.Parse(&configInstance.Http.Cors); err != nil {
 		slog.Info(fmt.Sprintf("Error: %v", err))
 	}
-	err = env.Parse(&configInstance.Database)
-	if err != nil {
+	if err = env.Parse(&configInstance.Database); err != nil {
 		slog.Info(fmt.Sprintf("Error: %v", err))
 	}
-	err = env.Parse(&configInstance.Logging)
-	if err != nil {
+	if err = env.Parse(&configInstance.Logging); err != nil {
 		slog.Info(fmt.Sprintf("Error: %v", err))
 	}
 

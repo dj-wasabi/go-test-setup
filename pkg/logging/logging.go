@@ -10,19 +10,6 @@ import (
 	"werner-dijkerman.nl/test-setup/pkg/config"
 )
 
-// Logger interface defines methods for logging at different levels.
-// type LoggerInterface interface {
-// 	Debug(string, string, ...any)
-// 	Info(string, string, ...any)
-// 	Warn(string, string, ...any)
-// 	Error(string, string, ...any)
-// }
-
-// type CustomLogger struct {
-// 	LoggerInterface
-// 	logger *slog.Logger
-// }
-
 var (
 	once   sync.Once
 	logger *slog.Logger
@@ -64,23 +51,3 @@ func Initialize() *slog.Logger {
 	})
 	return logger
 }
-
-// // Debug logs a debug message.
-// func (l *CustomLogger) Debug(logid, msg string, args ...any) {
-// 	l.logger.Debug("log_id", logid, fmt.Sprintf(msg, args...))
-// }
-
-// // Info logs an info message.
-// func (l *CustomLogger) Info(logid, msg string, args ...any) {
-// 	l.logger.Info("log_id", logid, fmt.Sprintf(msg, args...))
-// }
-
-// // Warn logs a warning message.
-// func (l *CustomLogger) Warn(logid, msg string, args ...any) {
-// 	l.logger.Warn("log_id", logid, fmt.Sprintf(msg, args...))
-// }
-
-// // Error logs an error message.
-// func (l *CustomLogger) Error(logid, msg string, args ...any) {
-// 	l.logger.Error("log_id", logid, fmt.Sprintf(msg, args...))
-// }

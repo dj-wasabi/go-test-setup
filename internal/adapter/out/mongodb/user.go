@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,6 +34,30 @@ func NewUserMongoService(repo *MongodbRepository, log *slog.Logger) out.PortUser
 		logging:    log,
 		repository: repo,
 	}
+}
+
+// Create an admin user if it doesn't exist while starting the application.
+func NewAdminUser(pu out.PortUserInterface) error {
+	ctx := context.Background()
+	if _, error := pu.GetByName("administrator", ctx); error != nil {
+		if error.Error == "no user found" {
+			auth := utils.NewAuthentication()
+			password := os.Getenv("INITIAL_ADMIN_PASSWORD")
+			passwordHash, _ := auth.HashPassword(&password)
+			adminUser := &out.UserPort{
+				Username: "administrator",
+				Password: passwordHash,
+				Role:     "admin",
+				Enabled:  true,
+			}
+
+			if _, createError := pu.Create(ctx, adminUser); createError != nil {
+				panic(fmt.Sprintf("Error while creating an admin user: %v", createError))
+			}
+			return nil
+		}
+	}
+	return nil
 }
 
 func (uc *userService) Create(ctx context.Context, user *out.UserPort) (*out.UserPort, *model.Error) {
@@ -74,12 +99,11 @@ func (uc *userService) GetByName(username string, ctx context.Context) (*out.Use
 	result := uc.repository.Collection.FindOne(ctx, bson.M{"username": username})
 	if result.Err() == mongo.ErrNoDocuments {
 		uc.logging.Info("log_id", utils.GetLogId(ctx), fmt.Sprintf("User '%v' not found.", username))
-		return nil, model.NewError(result.Err().Error())
+		return nil, model.NewError("no user found")
 	}
 
 	user := new(*out.UserPort)
-	err := result.Decode(&user)
-	if err != nil {
+	if err := result.Decode(&user); err != nil {
 		uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error while decoding the user object, have error: '%v'", err))
 	}
 
@@ -97,12 +121,11 @@ func (uc *userService) GetById(userId string, ctx context.Context) (*out.UserPor
 	result := uc.repository.Collection.FindOne(ctx, bson.M{"_id": objectId})
 	if result.Err() == mongo.ErrNoDocuments {
 		uc.logging.Info("log_id", utils.GetLogId(ctx), fmt.Sprintf("User with id '%v' not found.", userId))
-		return nil, model.NewError(result.Err().Error())
+		return nil, model.NewError("no user found")
 	}
 
 	user := new(*out.UserPort)
-	err = result.Decode(&user)
-	if err != nil {
+	if err = result.Decode(&user); err != nil {
 		uc.logging.Error("log_id", utils.GetLogId(ctx), fmt.Sprintf("Error while decoding the user object, have error: '%v'", err))
 	}
 

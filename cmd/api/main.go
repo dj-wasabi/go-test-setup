@@ -33,6 +33,7 @@ func main() {
 	serviceTokenStore := tokenstore.NewTokenstoreService(red, logger)
 	ds := services.NewdomainServices(serviceTokenStore, serviceOrganisation, serviceUser)
 
+	mongodb.NewAdminUser(serviceUser)
 	server := api.NewGinServer(serviceUser, serviceTokenStore, api.NewApiService(ds), c, logger)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
