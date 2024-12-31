@@ -33,7 +33,9 @@ func main() {
 	serviceTokenStore := tokenstore.NewTokenstoreService(red, logger)
 	ds := services.NewdomainServices(serviceTokenStore, serviceOrganisation, serviceUser)
 
-	mongodb.NewAdminUser(serviceUser)
+	if adminCreateError := mongodb.NewAdminUser(serviceUser); adminCreateError != nil {
+		logger.Error(fmt.Sprintf("Error while creating the admin user: %v", adminCreateError))
+	}
 	server := api.NewGinServer(serviceUser, serviceTokenStore, api.NewApiService(ds), c, logger)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

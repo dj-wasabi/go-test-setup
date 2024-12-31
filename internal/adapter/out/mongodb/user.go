@@ -52,7 +52,7 @@ func NewAdminUser(pu out.PortUserInterface) error {
 			}
 
 			if _, createError := pu.Create(ctx, adminUser); createError != nil {
-				panic(fmt.Sprintf("Error while creating an admin user: %v", createError))
+				return errors.New(createError.Error)
 			}
 			return nil
 		}
