@@ -24,6 +24,7 @@ var (
 
 func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 	log_id := GetXAppLogId(c)
+	//nolint:ineffassign,staticcheck
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
 	ctx, span := tracer.Start(c.Request.Context(), "InAuthenticate")

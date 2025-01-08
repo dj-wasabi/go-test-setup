@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"werner-dijkerman.nl/test-setup/internal/core/domain/model"
 	"werner-dijkerman.nl/test-setup/pkg/utils"
 )
-
-var tracer = otel.Tracer("test-go-setup")
 
 func (c *domainServices) AuthenticateLoginService(ctx context.Context, username, password, log_id string) (*model.AuthenticateToken, *model.Error) {
 	span := trace.SpanFromContext(ctx)

@@ -52,7 +52,7 @@ func TestGet(t *testing.T) {
 	setupRedis(t)
 	prepareTests()
 
-	mr.Set("myusername", "randomtoken")
+	_ = mr.Set("myusername", "randomtoken")
 
 	serviceTokenstore = NewTokenstoreService(rdb, logs)
 	token, tokenErr := serviceTokenstore.Get(ctx, "myusername")

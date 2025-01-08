@@ -16,8 +16,10 @@ import (
 func (uc *userService) UpdateToken(ctx context.Context, token, username string) bool {
 	var updateObj primitive.D
 
+	//nolint:govet
 	updateObj = append(updateObj, bson.E{"token", token})
 	updatedAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	//nolint:govet
 	updateObj = append(updateObj, bson.E{"updated_at", updatedAt})
 
 	upsert := true
@@ -28,6 +30,7 @@ func (uc *userService) UpdateToken(ctx context.Context, token, username string) 
 
 	uc.logging.Debug("log_id", utils.GetLogId(ctx), fmt.Sprintf("Updating token for username %v", username))
 	timeStart := time.Now()
+	//nolint:govet
 	_, err := uc.repository.Collection.UpdateOne(
 		ctx,
 		filter,

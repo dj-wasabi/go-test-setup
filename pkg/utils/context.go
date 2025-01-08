@@ -21,8 +21,9 @@ func NewContextWrapper(con context.Context, logId string) ContextWrapper {
 }
 
 func (w ContextWrapper) Build() context.Context {
-	for k, v := range w.m {
-		w.ctx = context.WithValue(w.ctx, k, v)
+	for key, value := range w.m {
+		//nolint:staticcheck
+		w.ctx = context.WithValue(w.ctx, key, value)
 	}
 	return w.ctx
 }

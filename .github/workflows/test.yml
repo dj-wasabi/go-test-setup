@@ -1,6 +1,13 @@
 name: Test Go
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -44,9 +51,6 @@ jobs:
         with:
           args: '-exclude-generated -fmt json ./... > TestResults-gosec-${{ matrix.go-version }}.json'
 
-      - name: Build Application
-        run: go build -o ./api ./cmd/api
-
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -64,3 +68,11 @@ jobs:
         with:
           name: Go-results-gosec-${{ matrix.go-version }}
           path: TestResults-gosec-${{ matrix.go-version }}.json
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+
+      - name: Build Application
+        run: go build -o ./api ./cmd/api
