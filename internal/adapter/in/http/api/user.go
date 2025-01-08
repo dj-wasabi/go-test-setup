@@ -28,6 +28,7 @@ var (
 
 func (cs *ApiHandler) UserCreate(c *gin.Context) {
 	log_id := GetXAppLogId(c)
+	//nolint:ineffassign,staticcheck
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
 	ctx, span := tracer.Start(c.Request.Context(), "InUserCreate")
@@ -71,6 +72,7 @@ func (cs *ApiHandler) UserCreate(c *gin.Context) {
 
 func (cs *ApiHandler) GetUserByID(c *gin.Context, userId string) {
 	log_id := GetXAppLogId(c)
+	//nolint:ineffassign,staticcheck
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
 	ctx, span := tracer.Start(c.Request.Context(), "InUserGetById")

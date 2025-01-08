@@ -26,6 +26,7 @@ var (
 
 func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 	log_id := GetXAppLogId(c)
+	//nolint:ineffassign,staticcheck
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
 	ctx, span := tracer.Start(c.Request.Context(), "InOrganisationCreate")
@@ -68,6 +69,7 @@ func (cs *ApiHandler) CreateOrganisation(c *gin.Context) {
 
 func (cs *ApiHandler) GetAllOrganisations(c *gin.Context, params GetAllOrganisationsParams) {
 	log_id := GetXAppLogId(c)
+	//nolint:ineffassign,staticcheck
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
 	ctx, span := tracer.Start(c.Request.Context(), "InOrganisationsGetAll")

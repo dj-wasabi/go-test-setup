@@ -25,6 +25,7 @@ func main() {
 
 	if c.Tracing.Enabled {
 		otelTracing := api.InitTracer(c, logger)
+		//nolint:errcheck
 		defer otelTracing(context.Background())
 	}
 
