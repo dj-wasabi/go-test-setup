@@ -31,6 +31,7 @@ var customConfigErrorMessages = map[string]string{
 	"Write.required":    "The field 'HTTP_TIMEOUT_WRITE' is required.",
 	"Write.numeric":     "Need to have a proper (numeric) port value.",
 	"Level.oneof":       "Only one of the 'debug', 'info', 'warn', 'warning' or 'error' are allowed.",
+	"Enabled.boolean":   "The field should either be set to 'true' or 'false'.",
 }
 
 type Config struct {
@@ -38,6 +39,7 @@ type Config struct {
 	Database    database   `yaml:"database"`
 	Logging     logging    `yaml:"logging"`
 	Tokentstore tokenstore `yaml:"tokenstore"`
+	Tracing     tracing    `yaml:"tracing"`
 }
 
 type database struct {
@@ -55,6 +57,12 @@ type tokenstore struct {
 	Password string `yaml:"password,omitempty" env:"TOKENSTORE_PASSWORD"`
 	Dbname   string `yaml:"dbname" env:"TOKENSTORE_DBNAME" validate:"required"`
 	Protocol int    `yaml:"protocol" validate:"oneof=2 3"`
+}
+
+type tracing struct {
+	Appname  string `yaml:"appname" env:"TRACING_APPNAME" validate:"required,boolean"`
+	Enabled  bool   `yaml:"enabled" env:"TRACING_ENABLED" validate:"required,boolean"`
+	Endpoint string `yaml:"endpoint" env:"TRACING_ENDPOINT" validate:"required_if=Enabled True"`
 }
 
 type http struct {
@@ -94,6 +102,9 @@ func loadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	if err = env.Parse(&configInstance.Tracing); err != nil {
+		slog.Info(fmt.Sprintf("Error: %v", err))
+	}
 	if err = env.Parse(&configInstance.Http); err != nil {
 		slog.Info(fmt.Sprintf("Error: %v", err))
 	}

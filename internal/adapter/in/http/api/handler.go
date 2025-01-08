@@ -16,6 +16,13 @@ import (
 	"github.com/google/uuid"
 	middleware "github.com/oapi-codegen/gin-middleware"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"werner-dijkerman.nl/test-setup/internal/core/port/in"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	intmid "werner-dijkerman.nl/test-setup/internal/middleware"
@@ -26,9 +33,10 @@ import (
 
 type envelope map[string]any
 
-var logid string = "X-APP-LOG-ID"
+const logid string = "X-APP-LOG-ID"
 
 var (
+	tracer                            = otel.Tracer("werner-dijkerman.nl/test-setup/internal/adapter/in/http/api")
 	authentication_requests_per_state = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "adapter_in_http_request_authentication",
 		Help: "A histogram of authentications request durations with in seconds.",
@@ -104,6 +112,11 @@ func NewGinServer(po out.PortUserInterface, ts out.PortStoreInterface, h *ApiHan
 	r.Use(gin.Recovery())
 	r.Use(intmid.JsonLoggerMiddleware())
 
+	if c.Tracing.Enabled {
+		l.Info("Enable Tracing via the otelgin middleware package")
+		r.Use(otelgin.Middleware(c.Tracing.Appname))
+	}
+
 	r.Use(middleware.OapiRequestValidatorWithOptions(swagger,
 		&middleware.Options{
 			Options: openapi3filter.Options{
@@ -127,4 +140,41 @@ func NewGinServer(po out.PortUserInterface, ts out.PortStoreInterface, h *ApiHan
 		ErrorLog:     slog.NewLogLogger(h.log.Handler(), slog.LevelError),
 	}
 	return s
+}
+
+func InitTracer(c *config.Config, l *slog.Logger) func(context.Context) error {
+	headers := map[string]string{
+		"content-type": "application/json",
+	}
+
+	l.Debug(fmt.Sprintf("Configuring Tracing app '%v' using endpoint %v", c.Tracing.Appname, c.Tracing.Endpoint))
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracehttp.NewClient(
+			otlptracehttp.WithEndpoint(c.Tracing.Endpoint),
+			otlptracehttp.WithInsecure(),
+			otlptracehttp.WithHeaders(headers),
+		),
+	)
+
+	if err != nil {
+		l.Error(fmt.Sprintf("Error while initialising OTEL endpoint: %v", err))
+	}
+
+	tracerprovider := trace.NewTracerProvider(
+		trace.WithBatcher(
+			exporter,
+			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
+			trace.WithBatchTimeout(trace.DefaultScheduleDelay*time.Millisecond),
+			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
+		),
+		trace.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String(c.Tracing.Appname),
+			),
+		),
+	)
+	otel.SetTracerProvider(tracerprovider)
+	return exporter.Shutdown
 }

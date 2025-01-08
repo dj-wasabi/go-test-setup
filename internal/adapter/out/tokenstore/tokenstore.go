@@ -5,10 +5,13 @@ import (
 	"log/slog"
 
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
 	"werner-dijkerman.nl/test-setup/internal/core/port/out"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
 )
+
+var tracer = otel.Tracer("werner-dijkerman.nl/test-setup/internal/adapter/out/tokenstore")
 
 type tokenstoreService struct {
 	logging *slog.Logger

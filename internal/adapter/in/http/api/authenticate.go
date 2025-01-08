@@ -26,6 +26,9 @@ func (cs *ApiHandler) AuthenticateLogin(c *gin.Context) {
 	log_id := GetXAppLogId(c)
 	ctx := utils.NewContextWrapper(c, log_id).Build()
 
+	ctx, span := tracer.Start(c.Request.Context(), "InAuthenticate")
+	defer span.End()
+
 	var e model.AuthenticateRequest
 	if err := c.ShouldBindJSON(&e); err != nil {
 		utils.HandleHTTPError(c, http.StatusBadRequest, err)

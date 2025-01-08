@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel"
 	"werner-dijkerman.nl/test-setup/pkg/config"
 	"werner-dijkerman.nl/test-setup/pkg/logging"
 )
@@ -16,6 +17,7 @@ var (
 		Name: "adapter_out_mongodb_user",
 		Help: "A histogram of authentications request durations with in seconds.",
 	}, []string{"state"})
+	tracer = otel.Tracer("werner-dijkerman.nl/test-setup/internal/adapter/out/mongodb")
 )
 
 func registerMetrics() {
