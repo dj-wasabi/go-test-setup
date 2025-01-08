@@ -6,7 +6,10 @@ import (
 	"regexp"
 
 	"github.com/go-playground/validator/v10"
+	"go.opentelemetry.io/otel"
 )
+
+var tracer = otel.Tracer("werner-dijkerman.nl/test-setup/pkg/validator")
 
 // Custom check to validate the provided password. Could not find an easy way to rely
 // on the OpenAPI/Struct Validator and making our own validator would be the best way.
@@ -26,6 +29,7 @@ func validatePassword(fl validator.FieldLevel) bool {
 }
 
 func CheckConfig(c any, errormessage map[string]string) error {
+
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := validate.RegisterValidation("validatePassword", validatePassword)
 	if err != nil {

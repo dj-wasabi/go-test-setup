@@ -35,6 +35,11 @@ tokenstore:
 logging:
   level: info
 
+tracing:
+  enabled: false
+  appname: my-application-name
+  endpoint: localhost:4318
+
 # Some dummy config
 pizza:
   konijn: pizza

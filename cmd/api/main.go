@@ -23,6 +23,11 @@ func main() {
 
 	c := config.ReadConfig()
 
+	if c.Tracing.Enabled {
+		otelTracing := api.InitTracer(c, logger)
+		defer otelTracing(context.Background())
+	}
+
 	con := mongodb.NewMongodbConnection(c)
 	red := tokenstore.NewTokenstoreConnection(c)
 	repoOrg := mongodb.NewOrganisationMongoRepo(con, "organisations")
