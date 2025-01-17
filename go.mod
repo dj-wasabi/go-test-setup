@@ -7,7 +7,7 @@ require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/getkin/kin-openapi v0.128.0
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-playground/validator/v10 v10.23.0
+	github.com/go-playground/validator/v10 v10.24.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/gin-middleware v1.0.2
@@ -17,11 +17,11 @@ require (
 	github.com/stretchr/testify v1.10.0
 	go.mongodb.org/mongo-driver v1.17.2
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.58.0
-	go.opentelemetry.io/otel v1.33.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.33.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.33.0
-	go.opentelemetry.io/otel/sdk v1.33.0
-	go.opentelemetry.io/otel/trace v1.33.0
+	go.opentelemetry.io/otel v1.34.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.34.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.34.0
+	go.opentelemetry.io/otel/sdk v1.34.0
+	go.opentelemetry.io/otel/trace v1.34.0
 	golang.org/x/crypto v0.32.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -31,7 +31,7 @@ require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.12.7 // indirect
-	github.com/bytedance/sonic/loader v0.2.2 // indirect
+	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
@@ -69,7 +69,7 @@ require (
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.61.0 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/speakeasy-api/openapi-overlay v0.9.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
@@ -83,7 +83,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.33.0 // indirect
-	go.opentelemetry.io/otel/metric v1.33.0 // indirect
+	go.opentelemetry.io/otel/metric v1.34.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 	golang.org/x/arch v0.13.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
@@ -92,9 +92,9 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
-	google.golang.org/grpc v1.69.2 // indirect
-	google.golang.org/protobuf v1.36.2 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
+	google.golang.org/grpc v1.69.4 // indirect
+	google.golang.org/protobuf v1.36.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
